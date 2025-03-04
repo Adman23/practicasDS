@@ -7,6 +7,6 @@
  *
  * @author adam
  */
-public class NewClass {
+public class CarreraCarretera {
     
 }
