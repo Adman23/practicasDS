@@ -7,6 +7,6 @@
  *
  * @author adam
  */
-public class CarreraCarretera {
-    
+public class CarreraCarretera implements Carrera{
+    public static final float PORCENTAJE_RETIRADA = 0.1f;
 }

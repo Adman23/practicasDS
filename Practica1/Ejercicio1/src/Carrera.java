@@ -1,7 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
- */
+
+import java.util.ArrayList;
+
+
 
 /**
  *
@@ -9,4 +9,5 @@
  */
 public interface Carrera {
     
+    public ArrayList<Bicicleta> bicicletas = new ArrayList<>();
 }

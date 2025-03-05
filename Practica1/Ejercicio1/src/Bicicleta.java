@@ -9,4 +9,5 @@
  */
 public interface Bicicleta {
     
+    public int id = 0;
 }

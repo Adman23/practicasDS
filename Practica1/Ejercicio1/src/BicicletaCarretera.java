@@ -7,6 +7,6 @@
  *
  * @author adam
  */
-public class BicicletaCarretera {
+public class BicicletaCarretera implements Bicicleta{
     
 }
