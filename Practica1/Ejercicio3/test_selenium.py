@@ -57,4 +57,3 @@ df = pd.DataFrame({
 })
 
 df.to_csv('football_data.csv', index=False)
-# driver.quit()
