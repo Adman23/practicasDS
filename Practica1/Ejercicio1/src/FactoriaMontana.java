@@ -1,21 +1,18 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 /**
  *
  * @author adam
  */
 public class FactoriaMontana implements FactoriaCarreraYBicicleta{
  
+    @Override
     public Carrera crearCarrera()
     {
         return new CarreraMontana();
     }
 
-    public Bicicleta crearBicicleta()
+    @Override
+    public Bicicleta crearBicicleta(int idCarrera)
     {
-        return new BicicletaMontana();
+        return new BicicletaMontana(idCarrera);
     }
 }

@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 
 /**
  *
@@ -9,14 +6,16 @@
  */
 public class FactoriaCarretera implements FactoriaCarreraYBicicleta {
     
+    @Override
     public Carrera crearCarrera()
     {
         return new CarreraCarretera();
     }
     
-    public Bicicleta crearBicicleta()
+    @Override
+    public Bicicleta crearBicicleta(int idCarrera)
     {
-        return new BicicletaCarretera();
+        return new BicicletaCarretera(idCarrera);
     }
 
 }

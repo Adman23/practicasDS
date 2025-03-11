@@ -2,12 +2,6 @@
 import java.util.ArrayList;
 
 
-
-/**
- *
- * @author adam
- */
-public interface Carrera {
-    
-    public ArrayList<Bicicleta> bicicletas = new ArrayList<>();
+public abstract class Carrera {
+    protected ArrayList<Bicicleta>  bicicletas = new ArrayList<>();
 }
