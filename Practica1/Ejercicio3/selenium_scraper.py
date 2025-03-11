@@ -1,6 +1,5 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
 import pandas as pd
 import time
@@ -21,9 +20,9 @@ tags = []
 for quote in quotes:
     text.append(quote.find_element(By.XPATH, './/span[@class="text"]').text)
     authors.append(quote.find_element(By.XPATH, './/small[@class="author"]').text)
-    print(quote.find_element(By.XPATH, './/small[@class="author"]').text)
-    tags.append(quote.find_element(By.XPATH, './/div[@class="tags"]/a').text)
-
+    
+    etiquetas = quote.find_elements(By.XPATH, './/div[@class="tags"]/a')
+    tags.append(", ".join([etiqueta.text for etiqueta in etiquetas]))  # Guardamos las etiquetas como una sola cadena
 
 input("Presiona Enter para cerrar el navegador...")
 
@@ -33,4 +32,5 @@ df = pd.DataFrame({
     'Tags': tags
 })
 
-df.to_csv('quotes_data.yaml', index=False)
+df.to_csv('quotes_data.csv', index=False)
+driver.quit()
