@@ -33,8 +33,8 @@ for i in range(5):
 
 driver.quit()
 
-with open('quotes_data.yaml', 'w') as file:
+with open('quotes_data_selenium.yaml', 'w') as file:
     yaml.dump(quotes_data, file)
 
-print('Datos guardados en "quotes_data.yaml"')
+print('Datos guardados en "quotes_data_selenium.yaml"')
 
