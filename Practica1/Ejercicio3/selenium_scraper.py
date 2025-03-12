@@ -1,8 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-import pandas as pd
-import time
+import yaml
 
 website = 'https://quotes.toscrape.com/'
 path = './chromedriver-linux64/chromedriver'
@@ -11,26 +10,31 @@ service = Service(path)
 driver = webdriver.Chrome(service=service)
 driver.get(website)
 
-quotes = driver.find_elements(By.CLASS_NAME, 'quote')
+quotes_data = []
 
-text = []
-authors = []
-tags = []
+for i in range(5):
+    quotes = driver.find_elements(By.CLASS_NAME, 'quote')
+    for quote in quotes:
+        text = quote.find_element(By.XPATH, './/span[@class="text"]').text
+        author = quote.find_element(By.XPATH, './/small[@class="author"]').text
+        tags = [tag.text for tag in quote.find_elements(By.XPATH, './/a[@class="tag"]')]
 
-for quote in quotes:
-    text.append(quote.find_element(By.XPATH, './/span[@class="text"]').text)
-    authors.append(quote.find_element(By.XPATH, './/small[@class="author"]').text)
+        quotes_data.append({
+            'Quote': text,
+            'Author': author,
+            'Tags': tags
+        })
     
-    etiquetas = quote.find_elements(By.XPATH, './/div[@class="tags"]/a')
-    tags.append(", ".join([etiqueta.text for etiqueta in etiquetas]))  # Guardamos las etiquetas como una sola cadena
+    if i == 4:
+        break
+    else:
+        next_page_button = driver.find_element(By.XPATH, '//li[@class="next"]/a')
+        next_page_button.click()
 
-input("Presiona Enter para cerrar el navegador...")
-
-df = pd.DataFrame({
-    'Quote': text,
-    'Author': authors,
-    'Tags': tags
-})
-
-df.to_csv('quotes_data.csv', index=False)
 driver.quit()
+
+with open('quotes_data.yaml', 'w') as file:
+    yaml.dump(quotes_data, file)
+
+print('Datos guardados en "quotes_data.yaml"')
+
