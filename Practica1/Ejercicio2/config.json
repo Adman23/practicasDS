@@ -1,0 +1,8 @@
+{
+  "texto": "Texto de entrada a resumir",
+  "input_lang": "en",
+  "output_lang": "es",
+  "model_llm": "",
+  "model_traslation": "",
+  "model_expansion": "",
+}
