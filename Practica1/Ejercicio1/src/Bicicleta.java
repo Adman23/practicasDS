@@ -1,13 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
- */
 
-/**
- *
- * @author adam
- */
-public interface Bicicleta {
+public abstract class Bicicleta {
     
-    public int id = 0;
+    public int idCarrera = 0;    
+    
+    public Bicicleta (int id){
+        idCarrera = id;
+    }
 }
