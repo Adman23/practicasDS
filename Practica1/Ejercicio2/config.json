@@ -1,8 +1,8 @@
 {
-  "texto": "Texto de entrada a resumir",
-  "input_lang": "en",
-  "output_lang": "es",
-  "model_llm": "",
-  "model_traslation": "",
-  "model_expansion": "",
+  "texto": "Los gatos son animales fascinantes y misteriosos. Con sus movimientos elegantes y su mirada penetrante, capturan la atención de todos. Son conocidos por su independencia, pero también disfrutan de la compañía humana. Les encanta jugar con objetos pequeños y descansar en lugares soleados. Además, su ronroneo es una señal de felicidad y confort. Tener un gato como mascota puede traer mucha alegría y compañía a cualquier hogar.",
+  "input_lang": "spanish",
+  "output_lang": "english",
+  "model_llm": "facebook/bart-large-cnn",
+  "model_translation": "Helsinki-NLP/opus-mt-es-en",
+  "model_expansion": "Qwen/Qwen2.5-Coder-32B-Instruct"
 }

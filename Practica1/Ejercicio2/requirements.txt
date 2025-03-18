@@ -1,0 +1,12 @@
+requests
+huggingface-hub
+
+# Lo que hay que hacer para ejecutar es lo siguiente:
+
+# Crear cuenta en hugging face, instalar con pip lo de arriba
+# Crear un token en tokens de acceso, simplemente marcando las casillas donde esta "Inference"
+# Ahora en el entorno de python (donde tengas el proyecto y eso)
+# huggingface-cli login
+# pones tu token
+# ya funciona
+# hugginface-cli logout para salir

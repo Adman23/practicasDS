@@ -1,9 +1,33 @@
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
 import llm_classes
-from transformers import pipeline
+import json
 
 
-#https://www.youtube.com/watch?v=1h6lfzJ0wZw
+def cargar_json(nombre):
+    with open(nombre, 'r') as archivo:
+        data = json.load(archivo)
+    return data
 
-model = pipeline("summarization", model="facebook/bart-large-cnn")
-response = model("texto")
-print(response)
+
+if __name__ == '__main__':
+    nombre_archivo = 'config.json'
+    json = cargar_json(nombre_archivo)
+
+    summary_model = llm_classes.BasicLLM()
+    translation_model = llm_classes.TranslationDecorator()
+    expansion_model = llm_classes.ExpansionDecorator()
+
+
+    texto_resumido = (summary_model.generate_summary(json["texto"], json["input_lang"], json["output_lang"], json["model_llm"]))
+    print(f"\n\nEl texto resumido es el siguiente: \n {texto_resumido}")
+
+    texto_traducido = (translation_model.generate_summary(texto_resumido, json["input_lang"], json["output_lang"], json["model_translation"]))
+    print(f"\n\nEl texto traducido es el siguiente: \n {texto_traducido}")
+
+    texto_expandido = (expansion_model.generate_summary(texto_resumido, json["input_lang"], json["output_lang"], json["model_expansion"]))
+    print(f"\n\nEl texto expandido es el siguiente: \n {texto_expandido}")
+
+    texto_traducido_expandido = (expansion_model.generate_summary(texto_traducido, json["input_lang"], json["output_lang"], json["model_expansion"]))
+    print(f"\n\nEl texto traducido y luego expandido es el siguiente: \n {texto_traducido_expandido}")
+
