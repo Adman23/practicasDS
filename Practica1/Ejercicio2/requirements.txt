@@ -1,6 +1,7 @@
 requests
 huggingface-hub
 
+
 # Lo que hay que hacer para ejecutar es lo siguiente:
 
 # Crear cuenta en hugging face, instalar con pip lo de arriba
