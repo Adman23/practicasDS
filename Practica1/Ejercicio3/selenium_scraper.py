@@ -15,8 +15,10 @@ class SeleniumScraper(ScrapingStrategy):
         driver.get(url)
 
         quotes_data = []
+        paginas = 5
+        pulsados = 4
 
-        for i in range(5):
+        for i in range(paginas):
             quotes = driver.find_elements(By.CLASS_NAME, 'quote')
             for quote in quotes:
                 text = quote.find_element(By.XPATH, './/span[@class="text"]').text
@@ -29,7 +31,7 @@ class SeleniumScraper(ScrapingStrategy):
                     'Tags': tags
                 })
             
-            if i == 4:
+            if i == pulsados:
                 break
             else:
                 next_page_button = driver.find_element(By.XPATH, '//li[@class="next"]/a')
