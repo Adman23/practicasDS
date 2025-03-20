@@ -1,1 +1,7 @@
+# Ignorar el entorno virtual
 ejer3/
+
+# Ignorar archivos compilados de Python
+__pycache__/
+*.pyc
+*.pyo
