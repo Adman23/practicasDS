@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 # Interfaz para modelos llm
-class InterfaceLLM(ABC):
+class LLM(ABC):
     @abstractmethod
     def __init__(self, text, model):
         pass
