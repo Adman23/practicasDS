@@ -1,4 +1,5 @@
-import llm_classes
+from llm_basic import *
+from llm_decorators import *
 import json
 
 
@@ -12,20 +13,31 @@ if __name__ == '__main__':
     nombre_archivo = 'config.json'
     json = cargar_json(nombre_archivo)
 
-    summary_model = llm_classes.BasicLLM()
-    translation_model = llm_classes.TranslationDecorator()
-    expansion_model = llm_classes.ExpansionDecorator()
+    input_text = json['text']
+    summ_model_name = json["model_llm"]
+    trans_model_name = json["model_translation"]
+    expan_model_name = json["model_expansion"]
+    input_lang = json["input_lang"]
+    output_lang = json["output_lang"]
 
 
-    texto_resumido = (summary_model.generate_summary(json["texto"], json["input_lang"], json["output_lang"], json["model_llm"]))
+    summary_model = BasicLLM(input_text, summ_model_name)
+    translation_model = TranslationDecorator(summary_model, trans_model_name, input_lang, output_lang)
+    expansion_model1 = ExpansionDecorator(summary_model, expan_model_name)
+    expansion_model2 = ExpansionDecorator(translation_model, expan_model_name)
+
+    texto_resumido = (summary_model.process())
     print(f"\n\nEl texto resumido es el siguiente: \n {texto_resumido}")
 
-    texto_traducido = (translation_model.generate_summary(texto_resumido, json["input_lang"], json["output_lang"], json["model_translation"]))
+
+    texto_traducido = (translation_model.process())
     print(f"\n\nEl texto traducido es el siguiente: \n {texto_traducido}")
 
-    texto_expandido = (expansion_model.generate_summary(texto_resumido, json["input_lang"], json["output_lang"], json["model_expansion"]))
+
+    texto_expandido = (expansion_model1.process())
     print(f"\n\nEl texto expandido es el siguiente: \n {texto_expandido}")
 
-    texto_traducido_expandido = (expansion_model.generate_summary(texto_traducido, json["input_lang"], json["output_lang"], json["model_expansion"]))
+
+    texto_traducido_expandido = (expansion_model2.process())
     print(f"\n\nEl texto traducido y luego expandido es el siguiente: \n {texto_traducido_expandido}")
 
