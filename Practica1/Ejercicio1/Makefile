@@ -18,7 +18,7 @@ $(BIN_DIR)/classes.timestamp: $(SOURCES)
 
 # Run the main class
 run: all
-	$(JAVA) -cp $(BIN_DIR) $(MAIN_CLASS)
+	$(JAVA) -cp $(BIN_DIR) $(MAIN_CLASS) $(ARGS)
 
 # Clean compiled files
 clean:
