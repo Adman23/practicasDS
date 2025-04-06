@@ -39,11 +39,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // Para introducir nuevas operaciones simplemente hay que introducirlas aqui
   // Si están implementadas se podrán usar en la aplicación
-  List<String> operations = ["Mean", "Trend"];
   List<bool> selectedOperations = [];
+  List<String> operations = [];
   StatisticsFactory factory = StatisticsFactory();
 
   _MyHomePageState(){
+    operations = factory.getOperationsList();
     selectedOperations = List.filled(operations.length, false);
   }
 
@@ -168,7 +169,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(results[idx]['name'].toString()),
-                        Text(results[idx]['value'].toString()),
+                        Text(results[idx]['value'].toStringAsFixed(4)),
                       ],
                     ),
                   );
