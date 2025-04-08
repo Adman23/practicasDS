@@ -3,18 +3,19 @@ import 'Correo.dart';
 
 // El correo no debe existir ya en el email
 class FiltroCorreoRepetido implements Filtro {
+  List<String> correos = [];
+
   @override
   MapEntry<bool,String> ejecutar(Correo correo) {
     MapEntry<bool,String> output;
 
     bool encontrado=false;
-    List<String> correos = [];
 
-    for (var email in correos) {
+    for (String email in correos) {
       if(correo.email == email){
         encontrado = true;
+        break;
       }
-
     }
 
     if (!encontrado){
