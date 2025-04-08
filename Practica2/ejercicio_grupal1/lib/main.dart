@@ -81,6 +81,11 @@ class MyCustomFormState extends State<MyCustomForm> {
       // si hay fallo y cual es el fallo
       MapEntry<bool, String> output = correo.enviarCorreo(email, password);
       _loginAlert(output.value);
+
+      if(output.key){
+        emailController.text = "";
+        passwordController.text = "";
+      }
     }
   }
 
