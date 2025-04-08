@@ -6,6 +6,7 @@ import 'FiltroCorreo.dart';
 import 'FiltroCharIntPassword.dart';
 import 'FiltroBlankPassword.dart';
 import 'Cliente.dart';
+import 'FiltroCorreoRepetido.dart';
 
 void main() => runApp(const MyApp());
 
@@ -44,6 +45,27 @@ class MyCustomFormState extends State<MyCustomForm> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+  late final AdminFiltros admin;
+  late final Cliente correo;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final correoFiltro = Objetivo();
+    admin = AdminFiltros(correoFiltro);
+
+    admin.addFiltro(FiltroCorreo());
+    admin.addFiltro(FiltroSizePassword());
+    admin.addFiltro(FiltroCharIntPassword());
+    admin.addFiltro(FiltroBlankPassword());
+    admin.addFiltro(FiltroCorreoRepetido());
+
+    correo = Cliente(admin);
+  }
+
+
+
   void _loginAlert(String message){
     showDialog<String> (
       context: context,
@@ -68,15 +90,8 @@ class MyCustomFormState extends State<MyCustomForm> {
         SnackBar(content: Text('Correo: $email, Contraseña: $password')),
       );
 
-      final correoFiltro = Objetivo();
-      final admin = AdminFiltros(correoFiltro);
 
-      admin.addFiltro(FiltroCorreo());
-      admin.addFiltro(FiltroSizePassword());
-      admin.addFiltro(FiltroCharIntPassword());
-      admin.addFiltro(FiltroBlankPassword());
 
-      final correo = Cliente(admin);
       // Enviar correo devuelve un par de valores que permiten identificar
       // si hay fallo y cual es el fallo
       MapEntry<bool, String> output = correo.enviarCorreo("$email", "$password");
