@@ -12,7 +12,6 @@ class Mean extends StatisticalOperation {
       result += super.values[i];
     }
     result = result / super.values.length;
-    super.lastValue = result;
     return result;
   }
 
@@ -77,8 +76,8 @@ class Median extends StatisticalOperation {
     double median = 0;
     int size = values.length;
     if (size % 2 == 0 && size >= 2){
-      double value1 = values[(size/2).toInt()];
-      double value2 = values[(size/2+1).toInt()];
+      double value1 = values[(size/2-1).toInt()];
+      double value2 = values[(size/2).toInt()];
       median = Mean([value1, value2]).operate();
     }
     else{

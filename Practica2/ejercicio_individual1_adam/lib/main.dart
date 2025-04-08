@@ -43,6 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> operations = [];
   StatisticsFactory factory = StatisticsFactory();
 
+
   _MyHomePageState(){
     operations = factory.getOperationsList();
     selectedOperations = List.filled(operations.length, false);
@@ -52,13 +53,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // Función para calcular el resultado de las operaciones escogidas
   void getResults(){
-    results.clear();
-    for (int i = 0; i < operations.length; i++){
-      if (selectedOperations[i]) {
-        StatisticalOperation operation = factory.getOperation(operations[i], values);
-        results.add({'name': operations[i].toString(), 'value': operation.operate()});
+      results.clear();
+      for (int i = 0; i < operations.length; i++){
+        if (selectedOperations[i]) {
+          StatisticalOperation operation = factory.getOperation(operations[i], values);
+          setState(() {
+            results.add({'name': operations[i].toString(), 'value': operation.operate()});
+          });
+        }
       }
-    }
   }
 
   @override
@@ -147,7 +150,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
           ElevatedButton(
             onPressed: () {
-              setState(() {getResults();});
+              setState(() {
+                getResults();
+              });
             },
             child: Text('Calculate'),
           ),
@@ -155,7 +160,6 @@ class _MyHomePageState extends State<MyHomePage> {
             flex: 4,
             child: Container(
               alignment: Alignment.topLeft,
-              color: Colors.lightBlue[75],
               child: ListView.builder(
                 itemCount: results.length,
                 itemBuilder: (context, idx) {

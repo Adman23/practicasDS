@@ -79,7 +79,7 @@ class MyCustomFormState extends State<MyCustomForm> {
       final correo = Cliente(admin);
       // Enviar correo devuelve un par de valores que permiten identificar
       // si hay fallo y cual es el fallo
-      MapEntry<bool, String> output = correo.enviarCorreo("$email", "$password");
+      MapEntry<bool, String> output = correo.enviarCorreo(email, password);
       _loginAlert(output.value);
     }
   }
