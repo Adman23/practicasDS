@@ -1,89 +1,95 @@
 import 'package:flutter/material.dart';
+import 'Objetivo.dart';
+import 'AdminFiltros.dart';
+import 'FiltroSizePassword.dart';
+import 'FiltroCorreo.dart';
+import 'FiltroCharIntPassword.dart';
+import 'FiltroBlankPassword.dart';
+import 'Cliente.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    const appTitle = 'INTRODUZCA CORREO Y CONTRASEÑA';
+
     return MaterialApp(
-      title: 'Ejercicio 1 grupal',
+      title: appTitle,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Filtros Intercepción'),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text(appTitle),
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        ),
+        body: const MyCustomForm(),
+      ),
     );
   }
 }
 
-
-
-
-//------------------------------------------------------------------------------
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+class MyCustomForm extends StatefulWidget {
+  const MyCustomForm({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  MyCustomFormState createState() => MyCustomFormState();
 }
 
-//------------------------------------------------------------------------------
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-
-      // Se puede poner de child un widget de layout que permita
-      // children y poner varios de ellos
-      body: Padding(
-        padding: EdgeInsets.all(5),
-        child: SendMail(),
-      ),
-
-
-    );
-  }
-}
-//------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------
-class SendMail extends StatefulWidget {
-  const SendMail({super.key});
-  @override
-  State<SendMail> createState() => _SendMailState();
-}
-
-//------------------------------------------------------------------------------
-class _SendMailState extends State<SendMail> {
-  // Funciones y variables
+class MyCustomFormState extends State<MyCustomForm> {
   final _formKey = GlobalKey<FormState>();
-  Map<String, String> users = {};
-  String _correo = "";
-  String _password = "";
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  void _loginAlert(String message){
+    showDialog<String> (
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, "OK"),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      String email = emailController.text;
+      String password = passwordController.text;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Correo: $email, Contraseña: $password')),
+      );
+
+      final correoFiltro = Objetivo();
+      final admin = AdminFiltros(correoFiltro);
+
+      admin.addFiltro(FiltroCorreo());
+      admin.addFiltro(FiltroSizePassword());
+      admin.addFiltro(FiltroCharIntPassword());
+      admin.addFiltro(FiltroBlankPassword());
+
+      final correo = Cliente(admin);
+      // Enviar correo devuelve un par de valores que permiten identificar
+      // si hay fallo y cual es el fallo
+      MapEntry<bool, String> output = correo.enviarCorreo("$email", "$password");
+      _loginAlert(output.value);
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Container(
+        padding: EdgeInsets.all(16),
         width: 500,
         decoration: BoxDecoration(
           border: Border.all(color: Colors.black, width: 2),
@@ -92,67 +98,39 @@ class _SendMailState extends State<SendMail> {
         child: Form(
           key: _formKey,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(users.toString()),
-
-              Padding(
-                padding: EdgeInsets.all(12),
-                child: TextFormField(
-                  decoration: InputDecoration(labelText: 'Correo'),
-                  validator: (value){
-                    if (value!.trim().isEmpty) {
-                      return 'Ingresa el correo';
-                    }
-                    return null;
-                  },
-
-                  onSaved: (value) {
-                    _correo = value!;
-                  },
-                ),
-              ),
-
-              Padding(
-                padding: EdgeInsets.all(12),
-                child: TextFormField(
-                  obscureText: true,
-                  enableSuggestions: false,
-                  autocorrect: false,
-                  obscuringCharacter: "*",
-                  decoration: InputDecoration(labelText: 'Contraseña'),
-                  validator: (value){
-                    if (value!.trim().isEmpty) {
-                      return 'Ingresa una contraseña';
-                    }
-                    return null;
-                  },
-
-                  onSaved: (value) {
-                    _password = value!;
-                  },
-                ),
-              ),
-
-              ElevatedButton(
-                onPressed: (){
-                  setState(() {
-                    if (_formKey.currentState!.validate()) {
-                      _formKey.currentState!.save();
-                      users[_correo] = _password;
-                    }
-                  });
+              TextFormField(
+                controller: emailController,
+                decoration: const InputDecoration(labelText: 'Correo'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor, introduce un correo';
+                  }
+                  return null;
                 },
-                child: Text('Enviar'),
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: passwordController,
+                decoration: const InputDecoration(labelText: 'Contraseña'),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor, introduce una contraseña';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _submitForm,
+                child: const Text('Enviar'),
               ),
             ],
           ),
         ),
       ),
     );
-
   }
 }
-//------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------
