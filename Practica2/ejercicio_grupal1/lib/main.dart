@@ -89,9 +89,6 @@ class MyCustomFormState extends State<MyCustomForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Correo: $email, Contraseña: $password')),
       );
-
-
-
       // Enviar correo devuelve un par de valores que permiten identificar
       // si hay fallo y cual es el fallo
       MapEntry<bool, String> output = correo.enviarCorreo(email, password);
