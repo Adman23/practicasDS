@@ -3,13 +3,6 @@ import 'BankService.dart';
 
 void main() {
   runApp(const MyApp());
-  BankService banco = BankService();
-  String accountNum = "ES 21 9183 76622 17 1825548610";
-  banco.createAccount();
-  banco.deposit(accountNum, 100);
-  print(banco.getBalance(accountNum));
-  banco.withdraw(accountNum, 50);
-  print(banco.getBalance(accountNum));
 }
 
 class MyApp extends StatelessWidget {
@@ -21,110 +14,170 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+        home: const BankWidget(title: 'Bienvenido usuario: Pepe'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+class BankWidget extends StatefulWidget {
+  const BankWidget({super.key, required this.title});
 
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<BankWidget> createState() => _BankWidget();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _BankWidget extends State<BankWidget> {
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  BankService bank = BankService();
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
+    return Scaffold( // Scaffold principal de la aplicación
+
+      // Barra título
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+
+      // Cuerpo central
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          // Listado Visual de Cuentas
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
+              children: [
+                // BLOQUE VISUALIZAR CUENTAS
+                Text("Cuentas: "), // Esto se puede poner más bonito
+                // Contenedor que tiene todas las cuentas en una lista
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    height: 100,
+                    decoration: BoxDecoration(
+                      border: Border(top: BorderSide(color: Colors.grey),
+                                    bottom: BorderSide(color: Colors.grey),
+                                    left: BorderSide(color: Colors.grey),
+                                    right: BorderSide(color: Colors.grey),),
+                    ),
+                    child: Center(
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        shrinkWrap: true,
+                        itemCount: bank.accounts.keys.length,
+                        itemBuilder: (context, idx){
+                          return Center(
+                                    child: Padding(padding:EdgeInsets.all(10.0),
+                                           child:Text(bank.accounts.keys.elementAt(idx))),
+                                  );
+                        },
+                      ),
+                    ),
+                  )
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+
+          // BLOQUE CREAR CUENTA
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      bank.createAccount();
+                    });
+                  },
+                  child: Text('Create new Account'),
+                ),
+              ],
+            ),
+          ),
+
+          // BLOQUE INGRESAR DINERO
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
+              children: [
+                // Campos de valor
+                //
+
+
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      // Codigo de ingresar, tiene que coger valores de los otros campos
+                    });
+                  },
+                  child: Text('Ingresar'),
+                ),
+              ],
+            ),
+          ),
+
+
+          // BLOQUE RETIRAR DINERO
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
+              children: [
+                Text("COSA1"),
+                Text("COSA2"),
+                Text("COSA3"),
+                Text("COSA4"),
+                Text("COSA5"),
+                Container(
+                  height: 100,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    border: Border(top: BorderSide(color: Colors.grey),
+                      bottom: BorderSide(color: Colors.grey),
+                      left: BorderSide(color: Colors.grey),
+                      right: BorderSide(color: Colors.grey),),
+                  ),
+                  child: Text("COSA9"),
+                )
+              ],
+            ),
+          ),
+
+
+          // BLOQUE TRANSFERIR DINERO
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
+              children: [
+                Text("COSA1"),
+                Text("COSA2"),
+                Text("COSA3"),
+                Text("COSA4"),
+                Text("COSA5"),
+                Container(
+                  height: 100,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    border: Border(top: BorderSide(color: Colors.grey),
+                      bottom: BorderSide(color: Colors.grey),
+                      left: BorderSide(color: Colors.grey),
+                      right: BorderSide(color: Colors.grey),),
+                  ),
+                  child: Text("COSA9"),
+                )
+              ],
+            ),
+          )
+
+        ]
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
