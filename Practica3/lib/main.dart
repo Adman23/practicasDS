@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'BankService.dart';
 
 void main() {
   runApp(const MyApp());
+  BankService banco = BankService();
+  String accountNum = "ES 21 9183 76622 17 1825548610";
+  banco.createAccount();
+  banco.deposit(accountNum, 100);
+  print(banco.getBalance(accountNum));
+  banco.withdraw(accountNum, 50);
+  print(banco.getBalance(accountNum));
 }
 
 class MyApp extends StatelessWidget {
