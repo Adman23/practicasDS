@@ -73,6 +73,21 @@ class _BankWidget extends State<BankWidget> {
     );
   }
 
+  void _ErrorAlert(String message){
+    showDialog<String> (
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, "OK"),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -224,10 +239,21 @@ class _BankWidget extends State<BankWidget> {
                     setState(() {
                       if (_selectedAccountDeposit != "") {
                         if (_amountDeposit != null && _amountDeposit != 0) {
-                          bank.deposit(_selectedAccountDeposit, _amountDeposit!);
+                          try{
+                            bank.deposit(_selectedAccountDeposit, _amountDeposit!);
+                          }
+                          catch(e){
+                            _ErrorAlert(e.toString());
+                          }
                           _valueControllerDeposit.clear();
                           _selectedAccountDeposit = "";
                         }
+                        else{
+                          _ErrorAlert("No hay cantidad o es incorrecta");
+                        }
+                      }
+                      else{
+                        _ErrorAlert("Tienes que seleccionar una cuenta a ingresar");
                       }
                     });
                   },
@@ -293,10 +319,21 @@ class _BankWidget extends State<BankWidget> {
                     setState(() {
                       if (_selectedAccountWithdrawal != "") {
                         if (_amountWithdrawal != null && _amountWithdrawal != 0) {
-                          bank.withdraw(_selectedAccountWithdrawal, _amountWithdrawal!);
+                          try {
+                            bank.withdraw(_selectedAccountWithdrawal, _amountWithdrawal!);
+                          }
+                          catch(e){
+                            _ErrorAlert(e.toString());
+                          }
                           _valueControllerWithdrawal.clear();
                           _selectedAccountWithdrawal = "";
                         }
+                        else{
+                          _ErrorAlert("No hay cantidad o es incorrecta");
+                        }
+                      }
+                      else{
+                        _ErrorAlert("Tienes que seleccionar una cuenta");
                       }
                     });
                   },
@@ -384,13 +421,30 @@ class _BankWidget extends State<BankWidget> {
                 ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      if (_valueControllerTransfer != "") {
-                        if (_amountTransfer != null && _amountTransfer != 0) {
-                          bank.transfer(_selectedAccountTransferFrom, _selectedAccountTransferTo, _amountTransfer!);
-                          _valueControllerTransfer.clear();
-                          _selectedAccountTransferTo = "";
-                          _selectedAccountTransferFrom = "";
+                      if (_selectedAccountTransferFrom != "") {
+                        if (_selectedAccountTransferTo != "") {
+                          if (_amountTransfer != null && _amountTransfer != 0) {
+                            try {
+                              bank.transfer(_selectedAccountTransferFrom,
+                                  _selectedAccountTransferTo, _amountTransfer!);
+                            }
+                            catch (e) {
+                              _ErrorAlert(e.toString());
+                            }
+                            _valueControllerTransfer.clear();
+                            _selectedAccountTransferTo = "";
+                            _selectedAccountTransferFrom = "";
+                          }
+                          else {
+                            _ErrorAlert("No hay cantidad o es incorrecta");
+                          }
                         }
+                        else{
+                          _ErrorAlert("Tienes que seleccionar una cuenta de destino");
+                        }
+                      }
+                      else{
+                        _ErrorAlert("Tienes que seleccionar una cuenta de origen");
                       }
                     });
                   },
