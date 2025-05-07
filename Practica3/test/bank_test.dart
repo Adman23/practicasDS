@@ -4,9 +4,9 @@ import  'package:sistema_bancario/Transaction.dart';
 import  'package:sistema_bancario/DepositTransaction.dart';
 import  'package:sistema_bancario/WithdrawalTransaction.dart';
 import  'package:sistema_bancario/TransferTransaction.dart';
-import 'package:sistema_bancario/BankService.dart';
-import 'package:sistema_bancario/DepositTransaction.dart';
-
+import  'package:sistema_bancario/BankService.dart';
+import  'package:sistema_bancario/DepositTransaction.dart';
+import  'package:test/test.dart';
 
 void main(){
   // TESTS para las cuentas
@@ -32,7 +32,7 @@ void main(){
   test('aumentarSaldo', () {
     String accountNum = "1";
     Account newAccount = Account(number: accountNum);
-    Transaction deposit = new DepositTransaction(amount: 3);
+    Transaction deposit = DepositTransaction(amount: 3);
     deposit.apply(accountNum);
 
     expect(banco.getBalance(banco.accounts.keys.elementAt(0)), equals(3.0));
