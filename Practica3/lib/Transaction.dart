@@ -1,6 +1,5 @@
 import './Account.dart';
 
-import 'dart:ui';
 
 abstract class Transaction {
   String id = "";
