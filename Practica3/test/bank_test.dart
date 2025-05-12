@@ -33,31 +33,28 @@ void main(){
     String accountNum = "1";
     Account newAccount = Account(number: accountNum);
     Transaction deposit = DepositTransaction(amount: 3);
-    deposit.apply(accountNum);
-
-    expect(banco.getBalance(banco.accounts.keys.elementAt(0)), equals(3.0));
+    deposit.apply(newAccount);
+    expect(newAccount.balance, equals(3.0));
   });
 
   test('retirarSaldoInsuficiente', () {
-    BankService banco = BankService();
-    banco.createAccount();
-
-    try {
-      banco.withdraw(banco.accounts.keys.elementAt(0), 3);
-    } on StateError {
-      print("Guay");
-    }
+    String accountNum = "1";
+    Account newAccount = Account(number: accountNum);
+    Transaction withdrawal = WithdrawalTransaction(amount: 3);
+    expect(() => withdrawal.apply(newAccount), throwsA(isA<StateError>()));
   });
 
   test('transferirSaldo', () {
-    BankService banco = BankService();
-    banco.createAccount();
-    banco.createAccount();
-
-    banco.deposit(banco.accounts.keys.elementAt(0), 5);
-    banco.transfer(banco.accounts.keys.elementAt(0), banco.accounts.keys.elementAt(1), 5);
-    expect(banco.getBalance(banco.accounts.keys.elementAt(0)), equals(0));
-    expect(banco.getBalance(banco.accounts.keys.elementAt(1)), equals(5));
+    String accountNum1 = "1";
+    String accountNum2 = "2";
+    Account newAccount1 = Account(number: accountNum1);
+    Account newAccount2 = Account(number: accountNum2);
+    Transaction deposit = DepositTransaction(amount: 10);
+    deposit.apply(newAccount1);
+    Transaction transfer = TransferTransaction(amount: 5, toAccount: newAccount2);
+    transfer.apply(newAccount1);
+    expect(newAccount1.balance, equals(5.0));
+    expect(newAccount2.balance, equals(5.0));
   });
 
   // TESTS para el bank service
