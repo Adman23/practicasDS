@@ -57,8 +57,51 @@ void main(){
     expect(newAccount2.balance, equals(5.0));
   });
 
-  // TESTS para el bank service
 
+
+  // TESTS para el bank service
+  test('lista_vacia', () {
+    BankService banco = BankService();
+    expect(banco.accounts.isEmpty, true);
+  });
+
+  test('deposit_aumenta', () {
+    BankService banco = BankService();
+    banco.createAccount();
+    banco.deposit(banco.accounts.keys.elementAt(0), 50);
+    expect(banco.getBalance(banco.accounts.keys.elementAt(0)), 50);
+  });
+
+  test('StateError_saldoInsuficiente', () {
+    BankService banco = BankService();
+    banco.createAccount();
+    banco.deposit(banco.accounts.keys.elementAt(0), 50);
+    expect(() => banco.withdraw(banco.accounts.keys.elementAt(0), 100), throwsA(isA<StateError>()));
+  });
+
+  test('mueve_fondos', () {
+    BankService banco = BankService();
+    banco.createAccount();
+    banco.deposit(banco.accounts.keys.elementAt(0), 50);
+    banco.createAccount();
+    banco.transfer(banco.accounts.keys.elementAt(0), banco.accounts.keys.elementAt(1), 25);
+    expect(banco.getBalance(banco.accounts.keys.elementAt(0)), 25);
+    expect(banco.getBalance(banco.accounts.keys.elementAt(1)), 25);
+  });
+
+  test('StateError_fondosTransferenciaInsuficiente', () {
+    BankService banco = BankService();
+    banco.createAccount();
+    banco.deposit(banco.accounts.keys.elementAt(0), 50);
+    banco.createAccount();
+    expect(() => banco.transfer(banco.accounts.keys.elementAt(0), banco.accounts.keys.elementAt(1), 65), throwsA(isA<StateError>()));
+  });
+
+  test('txId genera identificadores unicos', () {
+    BankService banco = BankService();
+    banco.createAccount();
+    banco.createAccount();
+    expect(banco.accounts.keys.first != banco.accounts.keys.elementAt(1),true);});
 
 
 
