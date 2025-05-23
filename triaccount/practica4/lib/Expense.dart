@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'User.dart';
 class Expense {
   String title;
