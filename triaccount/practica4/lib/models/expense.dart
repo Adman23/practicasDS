@@ -4,7 +4,7 @@ class Expense {
   double cost;
   DateTime date;
   User buyer;
-  Map<User, bool> participants;
+  Map<User, double> participants;
   String? photo;
 
   Expense({
