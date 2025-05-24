@@ -1,11 +1,15 @@
 
 class User{
-  String username = "";
-  String email = "";
-  String phone = "";
-  Map<int, String> groups = {}; // Son los id de los grupos y su nombre
+  int? id;
+  String? username;
+  final String? email;
+  final String? phone;
 
-  User(this.username, this.email, this.phone, this.groups);
+
+  User({required this.id, required this.username,
+        required this.email, required this.phone});
+
+  factory
 
   /*
     Esta función recibe:

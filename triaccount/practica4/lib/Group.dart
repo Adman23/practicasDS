@@ -1,5 +1,6 @@
 import 'User.dart';
 import 'Expense.dart';
+
 class Group {
   String groupName;
   List<User> users = [];
