@@ -1,5 +1,5 @@
 import 'Filter.dart';
-import '../Expense.dart';
+import '../models/expense.dart';
 
 class CorrectCostFormatFilter implements Filter {
   @override

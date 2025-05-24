@@ -1,5 +1,5 @@
-import 'User.dart';
-import 'Expense.dart';
+import 'user.dart';
+import 'expense.dart';
 
 class Group {
   String groupName;

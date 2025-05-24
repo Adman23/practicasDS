@@ -1,5 +1,5 @@
 import 'Target.dart';
-import '../Expense.dart';
+import '../models/expense.dart';
 import 'Filter.dart';
 
 class FilterChain implements Filter {

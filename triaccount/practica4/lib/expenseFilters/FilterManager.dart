@@ -1,4 +1,4 @@
-import 'package:triaccount/Expense.dart';
+import 'package:triaccount/models/expense.dart';
 
 import 'FilterChain.dart';
 import 'Target.dart';
