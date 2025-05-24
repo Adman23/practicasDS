@@ -1,4 +1,5 @@
 class Api::UsersController < ApiController
+    skip_before_action :require_login, only: [:create] # Le indica que se aplique ese except
     before_action :set_user, only: [:show, :groups, :create_group]
 
     # /api/users
@@ -16,7 +17,7 @@ class Api::UsersController < ApiController
     def create
         @user = User.new(user_params)
         if @user.save
-            render json: @user, status: :created
+            render json: status: :created
         else
             render json: { errors: @user.errors }, status: :unprocessable_entity
         end

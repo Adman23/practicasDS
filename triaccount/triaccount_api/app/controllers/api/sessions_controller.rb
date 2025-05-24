@@ -1,5 +1,5 @@
 class Api::SessionsController < ApiController
-    skip_before_action :require_login, only: [:create]
+    skip_before_action :require_login, only: [:create] # Le indica que se aplique ese except
 
     #login
     def create

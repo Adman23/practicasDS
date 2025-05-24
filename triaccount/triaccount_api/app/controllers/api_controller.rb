@@ -1,8 +1,6 @@
 class ApiController < ApplicationController
     private
-    before_action :require_login, except: [:create]
-
-    private
+    before_action :require_login
 
     def require_login
         unless logged_in?
@@ -11,7 +9,7 @@ class ApiController < ApplicationController
     end
 
     def logged_in?
-        !!current_user
+        !!current_user # Conversión a booleano
     end
 
     def current_user
