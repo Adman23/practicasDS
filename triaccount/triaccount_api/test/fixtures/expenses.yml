@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  title: MyString
+  cost: 1.5
+  date: 2025-05-24 12:19:02
+  participants: 
+  buyer: one
+  group: one
+
+two:
+  title: MyString
+  cost: 1.5
+  date: 2025-05-24 12:19:02
+  participants: 
+  buyer: two
+  group: two
