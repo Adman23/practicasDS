@@ -15,7 +15,7 @@ class Group {
     // Por ejemplo; si A le debe 15$ a B y B le debe 15$ a C entonces A le deberá 15$ a C.
   }
 
-  void addExpense({required String title, required double cost, required DateTime date, required User buyer, required Map<User, bool> participants, String? photo}) {
+  void addExpense({required String title, required double cost, required DateTime date, required User buyer, required Map<User, double> participants, String? photo}) {
     totalExpense += cost;
     // Crear gasto
     Expense expense = Expense(title: title, cost: cost, date: date, buyer: buyer, participants: participants, photo: photo);
