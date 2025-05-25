@@ -13,6 +13,12 @@ class Api::UsersController < ApiController
         render json: @user.as_json(include: :groups)
     end
 
+    # /api/retrieve_user
+    def retrieve_user
+        user = User.find_by(auth_token: request.headers["Authorization"])
+        render json: user.as_json(include: :groups), status: :ok
+    end
+
     # /api/users
     def create
         user = User.new(user_params)

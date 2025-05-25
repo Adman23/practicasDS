@@ -1,24 +1,25 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 
 /*
 
  */
 class TokenService {
-  static const String AUTH_TOKEN_KEY = 'auth_token';
 
   Future<void> saveToken (String token) async {
     final preferences = await SharedPreferences.getInstance();
-    preferences.setString(AUTH_TOKEN_KEY, token);
+    await preferences.setString("auth_token", token);
   }
 
   Future<String?> getToken() async {
     final preferences = await SharedPreferences.getInstance();
-    return preferences.getString(AUTH_TOKEN_KEY);
+    return preferences.getString("auth_token");
   }
 
   Future<void> clearToken() async {
     final preferences = await SharedPreferences.getInstance();
-    preferences.remove(AUTH_TOKEN_KEY);
+    await preferences.remove("auth_token");
   }
 
 }

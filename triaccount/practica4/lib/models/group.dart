@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:http/http.dart' as http;
 
@@ -97,30 +98,154 @@ class Group {
     }
   }
 
-  void updateBalance() {
+  /*
+    Actualiza tanto los balances como los refunds con el nuevo gasto
+    Funcionamiento:
+      Al buyer se le pone en los balances como +cost
+      A cada uno de los participantes se le pone a los balances -part
+      Recordar que si un username se repite se pondrá como username_email
+      si luego se pasa a crear el expense es importante que en participants
+      este definido de la misma forma así se puede buscar.
+
+      Al buyer esto no le pasará por lo que se tiene que comprobar primero
+      usernam_email y luego username para verificarlo, ya que los expenses
+      simplemente tienen uno que paga y luego ya el participants para mostrarlo
+   */
+  void updateBalance(Expense ex, User buyer) {
     // Se encarga de realizar la lógica que reparte los gastos de cada usuario.
     // Por ejemplo; si A le debe 15$ a B y B le debe 15$ a C entonces A le deberá 15$ a C.
+
+    // Actualizamos el buyer
+    if (balances.keys.contains("${buyer.username}_${buyer.email}")){
+      balances["${buyer.username}_${buyer.email}"] =
+          balances["${buyer.username}_${buyer.email}"]! + ex.cost;
+    }
+    else {
+        balances["${buyer.username}"] =
+            balances["${buyer.username}"]! + ex.cost;
+    }
+
+    ex.participants.forEach((key, value){
+      balances[key] = value - ex.cost;
+    });
+
+
+    // RECALCULAMOS las posibles devoluciones
+    // Para ello separamos quien está positivo en balances y quien está negativo
+    final List<MapEntry<String, double>> positive = [];
+    final List<MapEntry<String, double>> negative = [];
+    refunds = <String, Map<String, double>>{};
+
+    // Se mete cada uno en su mapa apropiado
+    balances.forEach((name, amount) {
+      if (amount > 0) {
+        positive.add(MapEntry(name, amount));
+      } else if (amount < 0) {
+        negative.add(MapEntry(name, amount.abs()));
+      }
+    });
+
+    // Se asigna las mismas keys que hay en balances positivos
+    // Ya que serán los que reciben
+    for (var p in positive) {
+      refunds[p.key] = {};
+    }
+
+    /*
+      Se van cogiendo los minimos entre cada uno de los positivos y de los
+      negativos, por ejemplo, si ahora se coge el primer negativo y el primer
+      positivo se mirará el minimo, si es el positivo se resta al negativo
+      esa cantidad y se pondrá en el reembolso esa misma cantidad, y como
+      ahora es 0 el value de positive[i] se pasa al siguiente y así.
+     */
+    int i = 0;
+    int j = 0;
+    while (i < positive.length && j < negative.length) {
+      final pos = positive[i];
+      final neg = negative[j];
+
+      final namePos = pos.key;
+      final nameNeg = neg.key;
+
+      final amount = min(pos.value, neg.value);
+
+      refunds[namePos]?[nameNeg] = amount;
+      positive[i] = MapEntry(namePos, pos.value - amount);
+      negative[j] = MapEntry(nameNeg, neg.value - amount);
+
+      if (positive[i].value <= 0) i++;
+      if (negative[j].value <= 0) j++;
+    }
   }
 
 
+  Future<void> updateGroupDB() async {
+    final token = await TokenService().getToken();
+    if (token == null) throw  Exception("No hay sesion");
 
-  void addExpense({
+    final url = Uri.parse('$apiUrl/$id');
+    final response = await http.post(url,
+        headers: {'Authorization': token,
+          'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'group': {
+            'group_name': groupName,
+            'total_expense': totalExpense,
+            'balances': balances,
+            'refunds': refunds,
+          }
+        }));
+
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 204){
+      // Toh bien
+    }
+    else{
+      final errors = data['errors'];
+      throw Exception("Error al modificar el grupo : $errors");
+    }
+  }
+
+
+  Future<Expense> addExpense({
     required String title,
     required double cost,
     required DateTime date,
     required User buyer,
     required Map<User, double> participants,
     String? photo,
-  }) {
-    totalExpense += cost;
-    Expense expense = Expense(
-      title: title,
-      cost: cost,
-      date: date,
-      buyer: buyer,
-      participants: participants,
-      photo: photo,
+  }) async {
+    final token = await TokenService().getToken();
+    if (token == null) return Expense.fromJson({});
+
+    final url = Uri.parse('$apiUrl/$id/users');
+    final response = await http.post(url,
+        headers: {'Authorization': token,
+          'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'expense': {
+            'title': title,
+            'cost': cost,
+            'date': date,
+            'buyer': buyer.id,
+            'participants': participants,
+            'image': photo
+          }
+        })
     );
-    expenses.add(expense);
+
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 201){
+      Expense nuevo = Expense.fromJson(data);
+      totalExpense += nuevo.cost;
+      expenses.add(nuevo);
+      updateBalance(nuevo, buyer);
+      updateGroupDB();
+      return nuevo;
+    }
+    else{
+      final errors = data['errors'];
+      throw Exception("Error al añadir gasto: $errors");
+    }
   }
 }

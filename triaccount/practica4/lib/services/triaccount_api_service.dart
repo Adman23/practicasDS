@@ -65,6 +65,26 @@ class TriAccountService {
     }
 
   /*
+    Coge el token si es que está y comprueba si está iniciado sesión
+   */
+  Future<User?> checkLogin() async {
+    final token = await TokenService().getToken();
+    if (token == null) return null;
+
+    final url = Uri.parse('$apiUrl/retrieve_user');
+    final response = await http.get(url,
+        headers: {'Authorization': token},
+    );
+
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      return User.fromJson(data);
+    }
+
+    return null;
+  }
+
+  /*
     Recibe el email y contraseña para inicio de sesión, que hará verificación
     Devuelve el User como objeto ya que será el que se use para luego mostrar
     los grupos.

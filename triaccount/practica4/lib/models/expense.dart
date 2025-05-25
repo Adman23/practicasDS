@@ -6,7 +6,7 @@ class Expense {
   double cost;
   DateTime date;
   User buyer;
-  Map<User, double> participants;
+  Map<String, double> participants;
   String? photo;
 
   Expense({
@@ -26,20 +26,22 @@ class Expense {
       cost: (json['cost'] as num).toDouble(),
       date: DateTime.parse(json['date']),
       buyer: User.fromJson(json['buyer']),
-      participants: (json['participants'] as Map<String, dynamic>).map(
-            (key, value) => MapEntry(
-          User(username: key),
-          (value as num).toDouble(),
-        ),
-      ),
+      participants: (json['participants'] as Map<String, dynamic>? ?? {})
+          .map((key, value) => MapEntry(
+        key,
+        double.tryParse(value.toString()) ?? 0.0,
+      )),
       photo: json['photo'] as String?,
     );
   }
 
+  /*
   @override
   bool operator == (Object other) =>
       identical(this, other) || // Compara en memoria
           (other is Expense &&
           runtimeType == other.runtimeType &&
           id == other.id && title == other.title);
+
+  */
 }

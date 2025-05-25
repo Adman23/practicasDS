@@ -15,7 +15,7 @@ class Api::GroupsController < ApiController
     # un POST /api/groups/id -> Modificar los parámetros que se hayan cambiado (quizás se podría hacer aqui el cambio)
     def update
         if group.update(group_params)
-            render json: group
+            head :no_content
         else
             render json: { errors: group.errors }, status: :unprocessable_entity
         end
@@ -44,10 +44,8 @@ class Api::GroupsController < ApiController
             render json: {error: "El usuario ya está en el grupo"}, status: :unprocessable_entity
         else
             username = user.username
-            index = 1
-            while group.group.balances&.key?[username]
-                username = "#{user.username}(#{index})"
-                index = index + 1
+            if group.group.balances&.key?[username]
+                username = "#{user.username}_#{user.email}"
             end
 
             group.balances[username] = 0

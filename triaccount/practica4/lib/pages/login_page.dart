@@ -23,11 +23,18 @@ class _LoginPageState extends State<LoginPage> {
   late User loggedUser;
 
   _LoginPageState() {
-    _startingLogOut();
+    _checkLogin();
   }
 
-  _startingLogOut() async {
-    await apiService.logout();
+  _checkLogin() async {
+    User? user = await apiService.checkLogin();
+    if (user != null){
+      loggedUser = user;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage(loggedUser: loggedUser)),
+      );
+    }
   }
 
   void _handleLogin() async {
