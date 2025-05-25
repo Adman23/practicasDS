@@ -64,15 +64,16 @@ class User{
     if (token == null) return [];
 
     final url = Uri.parse('$apiUrl/$id/groups');
-    final response = await http.post(url,
+    final response = await http.get(url,
         headers: {'Authorization': token,
           'Content-Type': 'application/json'});
 
     final data = jsonDecode(response.body);
     if (response.statusCode == 200){
-      return (data['groups'] as List<dynamic>? ?? [])
+      List<Group> grupos = (data as List<dynamic>? ?? [])
           .map((groupJson) => Group.fromJson(groupJson as Map<String,dynamic>))
           .toList();
+      return grupos;
     }
     else{
       final errors = data['error'];
@@ -89,30 +90,32 @@ class User{
       como único participante, el grupo no puede tener ni gastos ni
       nada, estar completamente vacío
    */
-  Future<void> createGroup(groupName) async{
+  Future<Group> createGroup(groupName) async{
     final token = await TokenService().getToken();
-    if (token == null) return;
+    if (token == null) throw  Exception("No hay sesion");
 
     final url = Uri.parse('$apiUrl/$id/groups');
     final response = await http.post(url,
       headers: {'Authorization': token,
                  'Content-Type': 'application/json'},
       body: jsonEncode({
-        'group_name': groupName,
-        'total_expense': 0,
-        'balances': {
-          '$username': 0,
-        },
-        'refunds': {
-          '$username': {},
-        },
+        'group': {
+          'group_name': groupName,
+          'total_expense': 0,
+          'balances': {
+            '$username': 0,
+          },
+          'refunds': {
+            '$username': {},
+          },
+        }
       }));
 
+    final data = jsonDecode(response.body);
     if (response.statusCode == 201){
-      // Se ha completado bien
+      return Group.fromJson(data);
     }
     else {
-      final data = jsonDecode(response.body);
       final errors = data['error'];
       throw Exception('Error al crear el grupo: $errors');
     }

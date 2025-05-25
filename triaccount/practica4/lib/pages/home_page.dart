@@ -1,24 +1,43 @@
 import 'package:flutter/material.dart';
+import '../models/group.dart';
+import '../models/user.dart';
 import 'group_page.dart';
 import '../services/triaccount_api_service.dart';
 import 'login_page.dart';
-import 'add_group_page.dart'; // Importa la página de crear grupo
+import 'add_group_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final User loggedUser;
+  const HomePage({super.key, required this.loggedUser});
+
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  final TriAccountService apiService = TriAccountService();
 
-  List<String> groups = ['Piso 2° Cuatri', 'Vacaciones Roma'];
+  final TriAccountService apiService = TriAccountService();
+  static List<Group> userGroups = [];
+  @override
+  void initState(){
+    super.initState();
+    _obtainGroups();
+  }
+
+  // Inicializar los grupos, se lanza en el constructor
+  void _obtainGroups() async {
+    userGroups = await widget.loggedUser.getGroups();
+    setState(() {
+      userGroups;
+    });
+  }
 
   void _handleLogout(BuildContext context) async {
     try {
       await apiService.logout();
+      userGroups.clear();
+      // Volver a login y limpiar la navegación
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => LoginPage()),
             (route) => false,
@@ -37,8 +56,9 @@ class _HomePageState extends State<HomePage> {
     );
 
     if (newGroupName != null && newGroupName.isNotEmpty) {
+      Group grp = await widget.loggedUser.createGroup(newGroupName);
       setState(() {
-        groups.add(newGroupName);
+        userGroups.add(grp);
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Grupo "$newGroupName" añadido')),
@@ -83,7 +103,7 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 12),
             Expanded(
               child: ListView.builder(
-                itemCount: groups.length,
+                itemCount: userGroups.length,
                 itemBuilder: (context, index) {
                   return Card(
                     color: Colors.grey[900],
@@ -93,7 +113,7 @@ class _HomePageState extends State<HomePage> {
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       title: Text(
-                        groups[index],
+                        userGroups[index].groupName,
                         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                       ),
                       trailing: Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey[400]),
@@ -101,7 +121,7 @@ class _HomePageState extends State<HomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => GroupPage(groupName: groups[index]),
+                            builder: (_) => GroupPage(groupName: userGroups[index].groupName),
                           ),
                         );
                       },
