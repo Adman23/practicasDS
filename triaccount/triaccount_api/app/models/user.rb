@@ -3,4 +3,6 @@ class User < ApplicationRecord
     has_many :memberships
     has_many :groups, through: :membership
     has_many :expenses, foreign_key: :buyer_id
+
+    validates :email, presence: true, uniqueness: true
 end

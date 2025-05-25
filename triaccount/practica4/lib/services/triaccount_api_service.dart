@@ -34,7 +34,7 @@ class TriAccountService {
     }
     else {
       final data = jsonDecode(response.body);
-      final errors = data["errors"];
+      final errors = data["error"];
       throw Exception('Error al registrar el usuario: $errors');
     }
   }
@@ -59,7 +59,7 @@ class TriAccountService {
         return user;
       }
       else{
-        final errors = data['errors'];
+        final errors = data['error'];
         throw Exception('Errors: $errors');
       }
     }

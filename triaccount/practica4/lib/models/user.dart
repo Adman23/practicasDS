@@ -1,12 +1,31 @@
 
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../services/token_service.dart';
+
 class User{
   int? id;
   String? username;
   String? email;
   String? phone;
 
+  final String apiUrl = "http://localhost:3000/api/users";
+
 
   User({ this.id, this.username, this.email, this.phone});
+
+
+  @override
+  bool operator == (Object other) =>
+    identical(this, other) || // Compara en memoria
+    (other is User &&
+    runtimeType == other.runtimeType &&
+    id == other.id && email == other.email);
+
+  @override
+  int get hashCode => Object.hash(id,email);
 
   /*
     Métod de creación a partir de un json que se obtiene a partir de una
@@ -29,6 +48,19 @@ class User{
   }
 
   /*
+    Objetivo:
+      Devolver los grupos de un usuario con todos los datos asociados
+
+    Tener en cuenta:
+      Al devolver los grupos se devuelve el grupo entero con sus datos
+      luego es fácil tenerlos todos guardados en la interfaz (no tener que
+      cargarlos cada vez) y cuando se entra en uno para ver los datos ya
+      están los datos ahí. Eso se puede guardar en la interfaz teniendo un
+      listado static de groups o algo así.
+   */
+
+
+  /*
     Esta función recibe:
       groupName -> Nombre de grupo, tiene que ser único y no existir
     Objetivo:
@@ -36,20 +68,32 @@ class User{
       como único participante, el grupo no puede tener ni gastos ni
       nada, estar completamente vacío
    */
-  createGroup(groupName){
+  Future<void> createGroup(groupName) async{
+    final token = await TokenService().getToken();
+    if (token == null) return;
 
-  }
+    final url = Uri.parse('$apiUrl/$id/groups');
+    final response = await http.post(url,
+      headers: {'Authorization': token,
+                 'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'group_name': groupName,
+        'total_expense': 0,
+        'balances': {
+          '$username': 0,
+        },
+        'refunds': {
+          '$username': {},
+        },
+      }));
 
-  /*
-    Esta función recibe:
-      group -> String representando nombre del grupo
-      user  -> String representando el nombre de usuario
-    Objetivo:
-      Asociar group con su id, hacer una instrucción de base de datos siempre
-      que se cumplan las condiciones, de añadir el user (único) siempre que
-      exista al grupo identificado por group
-   */
-  inviteUser(group, user){
-
+    if (response.statusCode == 201){
+      // Se ha completado bien
+    }
+    else {
+      final data = jsonDecode(response.body);
+      final errors = data['error'];
+      throw Exception('Error al crear el grupo: $errors');
+    }
   }
 }

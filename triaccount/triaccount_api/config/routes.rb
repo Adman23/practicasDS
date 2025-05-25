@@ -14,14 +14,14 @@ Rails.application.routes.draw do
     post "login", to: "sessions#create"
     delete "logout", to: "sessions#destroy"
 
-    resources :users, only: [:index, :show] do # GETs de index y show para ver todos los users y ver uno solo
+    resources :users, only: [:create, :index, :show] do # GETs de index y show para ver todos los users y ver uno solo
       get 'groups', on: :member # El get para /api/users/id/groups -> grupos de un usuario
       post 'groups', action: :create_group, on: :member # El post para /users/id/groups
     end
 
     resources :groups, only: [:index, :show, :update, :destroy] do # Operaciones de group
       get 'users', on: :member # El get para /api/groups/id/users -> Usuarios de un grupo
-      post 'users/:user_id', action: :add_user, on: :member # El post para /api/groups/id/users/id -> Añadir un usuario, no lo crea
+      post 'users/:email', action: :add_user, on: :member # El post para /api/groups/id/users -> Añadir un usuario, no lo crea
       delete 'users/:user_id', action: :remove_user, on: :member # El delete para /api/groups/id/users/id
                                                                 # Aqui (no deberia) borrarlos, simplemente borra el membership
 

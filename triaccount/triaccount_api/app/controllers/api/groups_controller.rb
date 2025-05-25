@@ -35,16 +35,28 @@ class Api::GroupsController < ApiController
         render json: group.users
     end
 
-    # POST /api/groups/id/users/id_u
+    # POST /api/groups/id/users
     def add_user
-        user = User.find(params[:user_id])
+        user = User.find_by(email: params[:email])
         if user.nil?
             render json: {error: "El usuario no existe"}, status: :unprocessable_entity
         elsif group.users.include?(user)
             render json: {error: "El usuario ya está en el grupo"}, status: :unprocessable_entity
         else
+            username = user.username
+            index = 1
+            while group.group.balances&.key?[username]
+                username = "#{user.username}(#{index})"
+                index = index + 1
+            end
+
+            group.balances[username] = 0
+            group.refunds[username] = {}
+            group.save!
             group.users << user
-            render json: {message: "Usuario añadido", user: user.as_json}, status: :created
+
+            render json: {  user: user.as_json(except: [:password_digest]),
+                            usernameKey: username}, status: :ok
         end
     end
 
@@ -53,7 +65,7 @@ class Api::GroupsController < ApiController
         user = User.find(params[:user_id])
         if user && group.users.include?(user)
             if group.users.delete(user)
-                head :ok
+                head :no_content
             else
                 render json: { error: "No se pudo eliminar usuario" }, status: :unprocessable_entity
             end
