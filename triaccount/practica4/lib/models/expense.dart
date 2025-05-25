@@ -35,4 +35,11 @@ class Expense {
       photo: json['photo'] as String?,
     );
   }
+
+  @override
+  bool operator == (Object other) =>
+      identical(this, other) || // Compara en memoria
+          (other is Expense &&
+          runtimeType == other.runtimeType &&
+          id == other.id && title == other.title);
 }
