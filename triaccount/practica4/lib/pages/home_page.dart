@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import 'group_page.dart';
 import '../services/triaccount_api_service.dart';
-import 'login_page.dart'; // Asegúrate de importar la página de login
+import 'login_page.dart';
+import 'add_group_page.dart'; // Importa la página de crear grupo
 
-class HomePage extends StatelessWidget {
-  final List<String> dummyGroups = ['Piso 2° Cuatri', 'Vacaciones Roma'];
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   final TriAccountService apiService = TriAccountService();
 
-  HomePage({super.key});
+  List<String> groups = ['Piso 2° Cuatri', 'Vacaciones Roma'];
 
   void _handleLogout(BuildContext context) async {
     try {
       await apiService.logout();
-      // Volver a login y limpiar la navegación
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => LoginPage()),
             (route) => false,
@@ -20,6 +26,22 @@ class HomePage extends StatelessWidget {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al cerrar sesión: $e')),
+      );
+    }
+  }
+
+  void _navigateToAddGroup() async {
+    final newGroupName = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (_) => const AddGroupPage()),
+    );
+
+    if (newGroupName != null && newGroupName.isNotEmpty) {
+      setState(() {
+        groups.add(newGroupName);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Grupo "$newGroupName" añadido')),
       );
     }
   }
@@ -61,7 +83,7 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 12),
             Expanded(
               child: ListView.builder(
-                itemCount: dummyGroups.length,
+                itemCount: groups.length,
                 itemBuilder: (context, index) {
                   return Card(
                     color: Colors.grey[900],
@@ -71,7 +93,7 @@ class HomePage extends StatelessWidget {
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       title: Text(
-                        dummyGroups[index],
+                        groups[index],
                         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                       ),
                       trailing: Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey[400]),
@@ -79,7 +101,7 @@ class HomePage extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => GroupPage(groupName: dummyGroups[index]),
+                            builder: (_) => GroupPage(groupName: groups[index]),
                           ),
                         );
                       },
@@ -92,9 +114,7 @@ class HomePage extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Navegar a formulario para crear grupo
-        },
+        onPressed: _navigateToAddGroup,
         backgroundColor: Colors.grey[900],
         child: const Icon(Icons.add, size: 32),
         shape: const CircleBorder(),
