@@ -1,8 +1,28 @@
 import 'package:flutter/material.dart';
 import 'group_page.dart';
+import '../services/triaccount_api_service.dart';
+import 'login_page.dart'; // Asegúrate de importar la página de login
 
 class HomePage extends StatelessWidget {
   final List<String> dummyGroups = ['Piso 2° Cuatri', 'Vacaciones Roma'];
+  final TriAccountService apiService = TriAccountService();
+
+  HomePage({super.key});
+
+  void _handleLogout(BuildContext context) async {
+    try {
+      await apiService.logout();
+      // Volver a login y limpiar la navegación
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => LoginPage()),
+            (route) => false,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al cerrar sesión: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +37,13 @@ class HomePage extends StatelessWidget {
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Cerrar sesión',
+            onPressed: () => _handleLogout(context),
+          )
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),

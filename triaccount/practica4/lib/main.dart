@@ -13,9 +13,10 @@ class TricountApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Triaccount',
       theme: ThemeData.dark(),
-      home: LoginPage(),
+      home: HomePage(),
     );
   }
 }
