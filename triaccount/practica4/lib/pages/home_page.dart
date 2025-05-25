@@ -1,17 +1,28 @@
 import 'package:flutter/material.dart';
+import '../models/group.dart';
+import '../models/user.dart';
 import 'group_page.dart';
 import '../services/triaccount_api_service.dart';
 import 'login_page.dart'; // Asegúrate de importar la página de login
 
 class HomePage extends StatelessWidget {
-  final List<String> dummyGroups = ['Piso 2° Cuatri', 'Vacaciones Roma'];
+  final User loggedUser;
   final TriAccountService apiService = TriAccountService();
+  static List<Group> userGroups = [];
+  HomePage({super.key, required this.loggedUser}){
+    _obtainGroups();
+  }
 
-  HomePage({super.key});
+
+  // Inicializar los grupos, se lanza en el constructor
+  void _obtainGroups() async {
+    userGroups = await loggedUser.getGroups();
+  }
 
   void _handleLogout(BuildContext context) async {
     try {
       await apiService.logout();
+      userGroups.clear();
       // Volver a login y limpiar la navegación
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => LoginPage()),
@@ -61,7 +72,7 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 12),
             Expanded(
               child: ListView.builder(
-                itemCount: dummyGroups.length,
+                itemCount: userGroups.length,
                 itemBuilder: (context, index) {
                   return Card(
                     color: Colors.grey[900],
@@ -71,7 +82,7 @@ class HomePage extends StatelessWidget {
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       title: Text(
-                        dummyGroups[index],
+                        userGroups[index].groupName,
                         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                       ),
                       trailing: Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey[400]),
@@ -79,7 +90,7 @@ class HomePage extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => GroupPage(groupName: dummyGroups[index]),
+                            builder: (_) => GroupPage(groupName: userGroups[index].groupName),
                           ),
                         );
                       },

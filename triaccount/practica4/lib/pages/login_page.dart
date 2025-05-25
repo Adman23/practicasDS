@@ -16,6 +16,8 @@ class _LoginPageState extends State<LoginPage> {
   bool isLoading = false;
   String? errorMessage;
 
+  late User loggedUser;
+
   void _handleLogin() async {
     setState(() {
       isLoading = true;
@@ -23,7 +25,7 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      User user = await apiService.login(
+      loggedUser = await apiService.login(
         emailController.text.trim(),
         passwordController.text,
       );
@@ -31,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
       // Si el login es exitoso, redirige al home
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => HomePage()),
+        MaterialPageRoute(builder: (_) => HomePage(loggedUser: loggedUser)),
       );
     } catch (e) {
       setState(() {
