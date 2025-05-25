@@ -83,6 +83,7 @@ class Group {
       final String newKey = data['usernameKey']?.toString() ?? "ERROR";
       users.add(newUser);
       balances[newKey] = 0;
+      refunds[newKey] = {};
     }
     else{
       final errors = data['error'];

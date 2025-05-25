@@ -30,7 +30,7 @@ class Api::UsersController < ApiController
             render json: {errors: "No se ha podido actualizar el username"}
 
     def groups
-        render json: user.groups
+        render json: user.groups.as_json(include: [:users, :expenses]), status: :ok
     end
 
     # POST /api/users/id/groups
@@ -39,7 +39,7 @@ class Api::UsersController < ApiController
         if group.save
             group.users << user;
 t
-            render json: group.as_json(include: :users), status: :created
+            render json: group.as_json(include: [:users, :expenses]), status: :created
         else
             render json: {errors: group.errors}, status: :unprocessable_entity
         end
