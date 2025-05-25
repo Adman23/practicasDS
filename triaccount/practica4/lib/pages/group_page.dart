@@ -1,28 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../models/group.dart';
 import '../models/user.dart';
 import '../services/triaccount_api_service.dart';
 import 'expense_detail_page.dart';
 import 'add_expense_page.dart';
 
 class GroupPage extends StatefulWidget {
-  final String groupName;
+  final Group group;
 
-  GroupPage({required this.groupName});
+ const GroupPage({super.key, required this.group});
 
   @override
-  _GroupPageState createState() => _GroupPageState();
+  State<GroupPage> createState() => _GroupPageState();
 }
 
 class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMixin {
-  // Usuarios que actualmente están en el grupo (simulado)
-  List<Map<String, dynamic>> groupUsers = [
-    {"name": "Imma", "amount": 17.0},
-    {"name": "Andres", "amount": -5.0},
-    {"name": "Antonio", "amount": -6.0},
-    {"name": "Izaro", "amount": -6.0},
-  ];
+
 
   // Gasto dummy para comprobar si un usuario puede eliminarse
   final List<Map<String, dynamic>> dummyExpenses = [
@@ -37,14 +32,12 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
   List<User> allUsers = [];
 
   // Para controlar la selección en el dropdown de añadir usuarios
-  Set<String> selectedUsersToAdd = {};
+  Set<User> selectedUsersToAdd = {};
 
   bool isLoadingUsers = false;
   bool isSavingChanges = false;
 
   final TriAccountService apiService = TriAccountService();
-
-  double get totalAmount => dummyExpenses.fold(0.0, (sum, item) => sum + item["amount"]);
 
   Map<String, List<Map<String, dynamic>>> get expensesGroupedByDate {
     Map<String, List<Map<String, dynamic>>> grouped = {};
@@ -69,7 +62,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
 
   Future<bool> _canRemoveUser(String name) async {
     // Simula que no puede eliminar si es comprador de algún gasto
-    return dummyExpenses.every((e) => e["buyer"] != name);
+    return widget.group.balances[name] != 0;
   }
 
   @override
@@ -89,9 +82,6 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
       });
     } catch (e) {
       debugPrint("Error cargando usuarios: $e");
-      setState(() {
-        allUsers = List.generate(5, (index) => User(username: 'DummyUser${index + 1}'));
-      });
     } finally {
       setState(() {
         isLoadingUsers = false;
@@ -105,7 +95,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
       context: context,
       builder: (context) {
         // Usuarios que no están aún en el grupo
-        final List<User> usersNotInGroup = allUsers.where((u) => !groupUsers.any((gu) => gu["name"] == u.username)).toList();
+        final List<User> usersNotInGroup = allUsers.where((u) => !widget.group.users.any((gu) => gu.username == u.username)).toList();
 
         return StatefulBuilder(
           builder: (context, setStateDialog) {
@@ -123,16 +113,16 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                     : ListView(
                   shrinkWrap: true,
                   children: usersNotInGroup.map((user) {
-                    final isSelected = selectedUsersToAdd.contains(user.username);
+                    final isSelected = selectedUsersToAdd.contains(user);
                     return CheckboxListTile(
                       title: Text(user.username!),
                       value: isSelected,
                       onChanged: (checked) {
                         setStateDialog(() {
                           if (checked == true) {
-                            selectedUsersToAdd.add(user.username!);
+                            selectedUsersToAdd.add(user);
                           } else {
-                            selectedUsersToAdd.remove(user.username);
+                            selectedUsersToAdd.remove(user);
                           }
                         });
                       },
@@ -154,8 +144,8 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                       : () {
                     setState(() {
                       // Añadir usuarios seleccionados al grupo con amount 0
-                      for (var username in selectedUsersToAdd) {
-                        groupUsers.add({"name": username, "amount": 0.0});
+                      for (var user in selectedUsersToAdd) {
+                        widget.group.inviteUser(user.email);
                       }
                       selectedUsersToAdd.clear();
                     });
@@ -204,7 +194,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            widget.groupName,
+            widget.group.groupName,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
           ),
           centerTitle: true,
@@ -224,7 +214,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Center(
                 child: Text(
-                  "Gastos Totales: ${totalAmount.toStringAsFixed(2)} €",
+                  "Gastos Totales: ${widget.group.totalExpense.toStringAsFixed(2)} €",
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -241,60 +231,53 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Stack(
                       children: [
-                        ListView(
-                          padding: const EdgeInsets.only(bottom: 80), // espacio para el botón
-                          children: expensesGroupedByDate.entries.map((entry) {
+                        // Lista principal de gastos
+                        ListView.builder(
+                          padding: const EdgeInsets.only(bottom: 80), // Espacio para el botón
+                          itemCount: widget.group.expenses.length,
+                          itemBuilder: (context, index) {
+                            final entry = widget.group.expenses[index];
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const SizedBox(height: 20),
-                                Text(
-                                  entry.key,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white70,
+                                Card(
+                                  color: Colors.grey[900],
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  margin: const EdgeInsets.symmetric(vertical: 6),
+                                  elevation: 3,
+                                  child: ListTile(
+                                    contentPadding:
+                                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                    title: Text(
+                                      entry.title,
+                                      style: const TextStyle(
+                                          fontSize: 18, fontWeight: FontWeight.w500),
+                                    ),
+                                    subtitle: Text("Pagado por: ${entry.buyer.username}"),
+                                    trailing: Text(
+                                      "${entry.cost.toStringAsFixed(2)} €",
+                                      style: const TextStyle(
+                                          fontSize: 20, fontWeight: FontWeight.w600),
+                                    ),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => ExpenseDetailPage(expense: entry),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
-                                const SizedBox(height: 8),
-                                ...entry.value.map((expense) {
-                                  return Card(
-                                    color: Colors.grey[900],
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12)),
-                                    margin: const EdgeInsets.symmetric(vertical: 6),
-                                    elevation: 3,
-                                    child: ListTile(
-                                      contentPadding: const EdgeInsets.symmetric(
-                                          horizontal: 20, vertical: 12),
-                                      title: Text(
-                                        expense["title"],
-                                        style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w500),
-                                      ),
-                                      subtitle: Text("Pagado por: ${expense["buyer"]}"),
-                                      trailing: Text(
-                                        "${expense["amount"].toStringAsFixed(2)} €",
-                                        style: const TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w600),
-                                      ),
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => ExpenseDetailPage(expense: expense),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  );
-                                }).toList(),
                               ],
                             );
-                          }).toList(),
+                          },
                         ),
+
+                        // Botón flotante abajo en pantalla
                         Positioned(
                           bottom: 16,
                           left: 0,
@@ -302,15 +285,13 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                           child: Center(
                             child: FloatingActionButton(
                               onPressed: () {
-                                List<String> usersInGroup =
-                                groupUsers.map((e) => e["name"].toString()).toList();
-
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (_) => AddExpensePage(
-                                      groupName: widget.groupName,
-                                      groupUsers: usersInGroup,
+                                      users: widget.group.users,
+                                      groupName: widget.group.groupName,
+                                      groupUsers: widget.group.balances.keys.toList(),
                                     ),
                                   ),
                                 );
@@ -329,11 +310,11 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
                     child: ListView.builder(
-                      itemCount: groupUsers.length,
+                      itemCount: widget.group.balances.keys.length,
                       itemBuilder: (context, index) {
-                        final person = groupUsers[index];
-                        final double amount = person["amount"];
-                        final bool isPositive = amount >= 0;
+                        final person = widget.group.balances.keys.elementAt(index);
+                        final double? amount = widget.group.balances[person];
+                        final bool isPositive = amount! >= 0;
 
                         return Card(
                           color: Colors.grey[900],
@@ -345,7 +326,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                             contentPadding:
                             const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                             title: Text(
-                              person["name"],
+                              person,
                               style:
                               const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                             ),
@@ -376,27 +357,27 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                         const SizedBox(height: 12),
                         Expanded(
                           child: ListView.builder(
-                            itemCount: groupUsers.length,
+                            itemCount: widget.group.balances.keys.length,
                             itemBuilder: (context, index) {
-                              final user = groupUsers[index];
+                              final user = widget.group.balances.keys.elementAt(index);
                               return Card(
                                 margin: const EdgeInsets.symmetric(vertical: 6),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12)),
                                 color: Colors.grey[900],
                                 child: ListTile(
-                                  title: Text(user["name"]),
+                                  title: Text(user),
                                   trailing: IconButton(
                                     icon: const Icon(Icons.delete, color: Colors.redAccent),
                                     onPressed: () async {
-                                      bool canRemove = await _canRemoveUser(user["name"]);
+                                      bool canRemove = await _canRemoveUser(user);
                                       if (!canRemove) {
                                         showDialog(
                                           context: context,
                                           builder: (context) => AlertDialog(
                                             title: const Text('No se puede eliminar'),
                                             content: Text(
-                                                '${user["name"]} no puede eliminarse porque tiene gastos pendientes.'),
+                                                '$user no puede eliminarse porque tiene gastos pendientes.'),
                                             actions: [
                                               TextButton(
                                                 onPressed: () => Navigator.pop(context),
@@ -408,7 +389,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                         return;
                                       }
                                       setState(() {
-                                        groupUsers.removeAt(index);
+                                          widget.group.removeUser(user);
                                       });
                                     },
                                   ),

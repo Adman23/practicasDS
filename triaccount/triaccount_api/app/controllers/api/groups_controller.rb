@@ -58,7 +58,7 @@ class Api::GroupsController < ApiController
         end
     end
 
-    # DELETE /api/groups/id/users/id_u
+    # DELETE /api/groups/id/users
     def remove_user
         user = User.find(params[:user_id])
         if user && group.users.include?(user)

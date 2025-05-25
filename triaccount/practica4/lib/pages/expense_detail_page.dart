@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../models/expense.dart';
+
 class ExpenseDetailPage extends StatelessWidget {
-  final Map<String, dynamic> expense;
+  final Expense expense;
 
   ExpenseDetailPage({required this.expense});
 
   @override
   Widget build(BuildContext context) {
-    final formattedDate = DateFormat("d 'de' MMMM 'de' y", 'es_ES').format(expense["date"]);
+    final formattedDate = DateFormat("d 'de' MMMM 'de' y", 'es_ES').format(expense.date);
 
     final List<Map<String, dynamic>> participants = [
       {"name": "Andres", "amount": 1.83},
@@ -24,7 +26,7 @@ class ExpenseDetailPage extends StatelessWidget {
           children: [
             // Título centrado
             Text(
-              expense["title"],
+              expense.title,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 26,
@@ -63,11 +65,11 @@ class ExpenseDetailPage extends StatelessWidget {
               child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 title: Text(
-                  expense["buyer"],
+                  expense.buyer.username!,
                   style: const TextStyle(fontSize: 20),
                 ),
                 trailing: Text(
-                  "${expense["amount"].toStringAsFixed(2)} €",
+                  "${expense.cost.toStringAsFixed(2)} €",
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,

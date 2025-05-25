@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import '../models/user.dart';
 import '../moneyDivisorModule/DivideStrategy.dart';
 import '../moneyDivisorModule/DivideByParts.dart';
 import '../moneyDivisorModule/DivideEqually.dart';
@@ -9,8 +10,9 @@ import '../moneyDivisorModule/DivideByAmount.dart';
 class AddExpensePage extends StatefulWidget {
   final String groupName;
   final List<String> groupUsers;
+  final List<User> users;
 
-  AddExpensePage({required this.groupName, required this.groupUsers});
+  AddExpensePage({required this.users, required this.groupName, required this.groupUsers});
 
   @override
   _AddExpensePageState createState() => _AddExpensePageState();

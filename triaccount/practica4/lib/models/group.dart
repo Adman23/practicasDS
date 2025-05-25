@@ -98,6 +98,46 @@ class Group {
     }
   }
 
+  Future<void> removeUser(username) async{
+    final token = await TokenService().getToken();
+    if (token == null) return;
+
+    // Obtenemos el id, el nombre puede ser o username normal
+    // o username_email
+    List<String> parts = username.split('_');
+    User chosen;
+    if (parts.length > 1){
+      String userEmail = parts[1];
+      chosen = users.where((user) => user.email == userEmail) as User;
+    }
+    else{
+      chosen = users.where((user) => user.username == username) as User;
+    }
+
+    int user_id = chosen.id!;
+
+    final url = Uri.parse('$apiUrl/$id/users');
+    final response = await http.post(url,
+        headers: {'Authorization': token,
+          'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'user_id': user_id
+        })
+    );
+
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 204){
+      users.remove(chosen);
+      balances.remove(username);
+    }
+    else{
+      final errors = data['error'];
+      throw Exception("No se ha podido añadir el usuario: $errors");
+    }
+  }
+
+
+
   /*
     Actualiza tanto los balances como los refunds con el nuevo gasto
     Funcionamiento:

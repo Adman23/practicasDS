@@ -52,7 +52,7 @@ class _HomePageState extends State<HomePage> {
   void _navigateToAddGroup() async {
     final newGroupName = await Navigator.push<String>(
       context,
-      MaterialPageRoute(builder: (_) => const AddGroupPage()),
+      MaterialPageRoute(builder: (context) => const AddGroupPage()),
     );
 
     if (newGroupName != null && newGroupName.isNotEmpty) {
@@ -121,7 +121,7 @@ class _HomePageState extends State<HomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => GroupPage(groupName: userGroups[index].groupName),
+                            builder: (_) => GroupPage(group: userGroups[index]),
                           ),
                         );
                       },
