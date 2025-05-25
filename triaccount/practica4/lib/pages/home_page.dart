@@ -3,17 +3,31 @@ import '../models/group.dart';
 import '../models/user.dart';
 import 'group_page.dart';
 import '../services/triaccount_api_service.dart';
-import 'login_page.dart'; // Asegúrate de importar la página de login
+import 'login_page.dart';
+import 'add_group_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  final User loggedUser;
+  const HomePage({super.key, this.loggedUser})
+
+
+
+  @override
+  State<HomePage> createState() => _HomePageState(loggedUser: loggedUser);
+}
+
+class _HomePageState extends State<HomePage> {
+
+  List<String> groups = ['Piso 2° Cuatri', 'Vacaciones Roma'];
+
+
   final User loggedUser;
   final TriAccountService apiService = TriAccountService();
   static List<Group> userGroups = [];
-  HomePage({super.key, required this.loggedUser}){
+
+  _HomePageState({required this.loggedUser}){
     _obtainGroups();
   }
-
-
   // Inicializar los grupos, se lanza en el constructor
   void _obtainGroups() async {
     userGroups = await loggedUser.getGroups();
@@ -31,6 +45,22 @@ class HomePage extends StatelessWidget {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al cerrar sesión: $e')),
+      );
+    }
+  }
+
+  void _navigateToAddGroup() async {
+    final newGroupName = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (_) => const AddGroupPage()),
+    );
+
+    if (newGroupName != null && newGroupName.isNotEmpty) {
+      setState(() {
+        groups.add(newGroupName);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Grupo "$newGroupName" añadido')),
       );
     }
   }
@@ -103,9 +133,7 @@ class HomePage extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Navegar a formulario para crear grupo
-        },
+        onPressed: _navigateToAddGroup,
         backgroundColor: Colors.grey[900],
         child: const Icon(Icons.add, size: 32),
         shape: const CircleBorder(),
