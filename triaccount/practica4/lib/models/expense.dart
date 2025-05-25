@@ -1,5 +1,7 @@
 import 'user.dart';
+
 class Expense {
+  int? id;
   String title;
   double cost;
   DateTime date;
@@ -8,6 +10,7 @@ class Expense {
   String? photo;
 
   Expense({
+    this.id,
     required this.title,
     required this.cost,
     required this.date,
@@ -15,4 +18,21 @@ class Expense {
     required this.participants,
     this.photo,
   });
+
+  factory Expense.fromJson(Map<String, dynamic> json) {
+    return Expense(
+      id: json['id'] as int?,
+      title: json['title'] as String,
+      cost: (json['cost'] as num).toDouble(),
+      date: DateTime.parse(json['date']),
+      buyer: User.fromJson(json['buyer']),
+      participants: (json['participants'] as Map<String, dynamic>).map(
+            (key, value) => MapEntry(
+          User(username: key),
+          (value as num).toDouble(),
+        ),
+      ),
+      photo: json['photo'] as String?,
+    );
+  }
 }
