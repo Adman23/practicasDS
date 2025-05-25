@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../services/triaccount_api_service.dart';
+import '../models/user.dart';
 
 class AddGroupPage extends StatefulWidget {
   const AddGroupPage({super.key});
@@ -10,15 +12,34 @@ class AddGroupPage extends StatefulWidget {
 class _AddGroupPageState extends State<AddGroupPage> {
   final TextEditingController _groupNameController = TextEditingController();
 
-  // Lista dummy de usuarios
-  final List<String> users = ['Ana', 'Carlos', 'Lucía', 'Miguel', 'Sofía'];
-  final Map<String, bool> selectedUsers = {};
+  List<User> users = [];
+  final Map<String, bool> selectedUsers = {}; // clave: email
+
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    for (var user in users) {
-      selectedUsers[user] = false;
+    _loadUsers();
+  }
+
+  Future<void> _loadUsers() async {
+    try {
+      final fetchedUsers = await TriAccountService().fetchUsers();
+      setState(() {
+        users = fetchedUsers;
+        for (var user in users) {
+          selectedUsers[user.email!] = false; // usar email como identificador único
+        }
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al cargar usuarios: $e')),
+      );
     }
   }
 
@@ -26,7 +47,7 @@ class _AddGroupPageState extends State<AddGroupPage> {
     final groupName = _groupNameController.text.trim();
     final selected = selectedUsers.entries
         .where((entry) => entry.value)
-        .map((entry) => entry.key)
+        .map((entry) => entry.key) // emails seleccionados
         .toList();
 
     if (groupName.isEmpty || selected.isEmpty) {
@@ -36,10 +57,13 @@ class _AddGroupPageState extends State<AddGroupPage> {
       return;
     }
 
-    // Aquí normalmente llamarías a la API para crear el grupo
+    // TODO: Llamar a la API para crear el grupo usando TriAccountService
+    // await TriAccountService().createGroup(currentUser.id, groupName, selected);
 
-    // Devuelve el nombre del grupo y cierra la pantalla
-    Navigator.pop(context, groupName);
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Grupo "$groupName" creado con ${selected.length} participantes.')),
+    );
   }
 
   @override
@@ -56,7 +80,9 @@ class _AddGroupPageState extends State<AddGroupPage> {
         ),
         centerTitle: true,
       ),
-      body: Padding(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
         padding: const EdgeInsets.all(20.0),
         child: ListView(
           children: [
@@ -82,11 +108,12 @@ class _AddGroupPageState extends State<AddGroupPage> {
             const SizedBox(height: 8),
             ...users.map((user) {
               return CheckboxListTile(
-                title: Text(user),
-                value: selectedUsers[user],
+                title: Text(user.username ?? 'Sin nombre'),
+                subtitle: Text(user.email ?? 'Sin email', style: TextStyle(fontSize: 12, color: Colors.grey[400])),
+                value: selectedUsers[user.email],
                 onChanged: (bool? value) {
                   setState(() {
-                    selectedUsers[user] = value ?? false;
+                    selectedUsers[user.email!] = value ?? false;
                   });
                 },
                 controlAffinity: ListTileControlAffinity.leading,
