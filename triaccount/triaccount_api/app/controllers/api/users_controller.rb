@@ -10,7 +10,7 @@ class Api::UsersController < ApiController
 
     # /api/users/id
     def show
-        render json: user.as_json(include: :groups)
+        render json: @user.as_json(include: :groups)
     end
 
     # /api/users
@@ -24,21 +24,23 @@ class Api::UsersController < ApiController
     end
 
     def update
-        if user.update(username: params[:username])
+        if @user.update(username: params[:username])
             head :no_content
         else
             render json: {errors: "No se ha podido actualizar el username"}
+        end
+    end
 
     def groups
-        render json: user.groups.as_json(include: [:users, :expenses]), status: :ok
+        render json: @user.groups.as_json(include: 
+        [:users.as_json(except: [:password_digest, :auth_token]), :expenses]), status: :ok
     end
 
     # POST /api/users/id/groups
     def create_group
         group = Group.new(group_params)
         if group.save
-            group.users << user;
-t
+            group.users << @user;
             render json: group.as_json(include: [:users, :expenses]), status: :created
         else
             render json: {errors: group.errors}, status: :unprocessable_entity
@@ -52,11 +54,11 @@ t
     end
 
     def group_params
-        params.require(:group).permit(:group_name, :total_expense, :balances, :refunds)
+        params.require(:group).permit(:group_name, :total_expense, balances: {}, refunds: {})
     end
 
     def set_user
-        user = User.find(params[:id])
+        @user = User.find(params[:id])
     rescue ActiveRecord::RecordNotFound
         render json: {error: "Usuario no encontrado"}, status: :not_found
     end    

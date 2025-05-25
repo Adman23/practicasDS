@@ -29,8 +29,22 @@ class Group {
   });
 
   factory Group.fromJson(Map<String, dynamic> json) {
+    // Manejar refunds
+    final refundsMap = json['refunds'] as Map<String, dynamic>? ?? {};
+    final refunds = refundsMap.map((key, value) {
+      final innerMap = <String, double>{};
+
+      if (value is Map) {
+        value.forEach((subKey, subValue) {
+          innerMap[subKey.toString()] = double.tryParse(subValue.toString()) ?? 0.0;
+        });
+      }
+
+      return MapEntry(key, innerMap);
+    });
+
     return Group(
-      id: json['id'] as int?,
+      id: int.tryParse(json['id'].toString()),
       groupName: json['group_name'] as String,
       expenses: (json['expenses'] as List<dynamic>? ?? [])
           .map((expenseJson) => Expense.fromJson(expenseJson as Map<String, dynamic>))
@@ -41,17 +55,9 @@ class Group {
       balances: (json['balances'] as Map<String, dynamic>? ?? {})
             .map((key, value) => MapEntry(
             key,
-          (value as num).toDouble(),
+            double.tryParse(value.toString()) ?? 0.0,
         )),
-      refunds: (json['refunds'] as Map<String, dynamic>? ?? {})
-          .map((key, value) => MapEntry(
-            key,
-            (value as Map<String, dynamic>? ?? {})
-                .map((key,value) => MapEntry(
-                  key,
-                  (value as num).toDouble()),
-          )),
-      ),
+      refunds: refunds,
       totalExpense: (json['total_expense'] as num?)?.toDouble() ?? 0.0,
     );
   }

@@ -5,11 +5,15 @@ import 'home_page.dart';
 import '../models/user.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
+
+
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TriAccountService apiService = TriAccountService();
@@ -17,6 +21,14 @@ class _LoginPageState extends State<LoginPage> {
   String? errorMessage;
 
   late User loggedUser;
+
+  _LoginPageState() {
+    _startingLogOut();
+  }
+
+  _startingLogOut() async {
+    await apiService.logout();
+  }
 
   void _handleLogin() async {
     setState(() {
@@ -33,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
       // Si el login es exitoso, redirige al home
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => HomePage(loggedUser: loggedUser)),
+        MaterialPageRoute(builder: (context) => HomePage(loggedUser: loggedUser)),
       );
     } catch (e) {
       setState(() {

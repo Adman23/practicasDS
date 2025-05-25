@@ -16,7 +16,7 @@ class TricountApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Triaccount',
       theme: ThemeData.dark(),
-      home: HomePage(),
+      home: LoginPage(),
     );
   }
 }

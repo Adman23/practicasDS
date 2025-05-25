@@ -8,29 +8,29 @@ import 'add_group_page.dart';
 
 class HomePage extends StatefulWidget {
   final User loggedUser;
-  const HomePage({super.key, this.loggedUser})
-
+  const HomePage({super.key, required this.loggedUser});
 
 
   @override
-  State<HomePage> createState() => _HomePageState(loggedUser: loggedUser);
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
 
-  List<String> groups = ['Piso 2° Cuatri', 'Vacaciones Roma'];
-
-
-  final User loggedUser;
   final TriAccountService apiService = TriAccountService();
   static List<Group> userGroups = [];
-
-  _HomePageState({required this.loggedUser}){
+  @override
+  void initState(){
+    super.initState();
     _obtainGroups();
   }
+
   // Inicializar los grupos, se lanza en el constructor
   void _obtainGroups() async {
-    userGroups = await loggedUser.getGroups();
+    userGroups = await widget.loggedUser.getGroups();
+    setState(() {
+      userGroups;
+    });
   }
 
   void _handleLogout(BuildContext context) async {
@@ -56,8 +56,9 @@ class _HomePageState extends State<HomePage> {
     );
 
     if (newGroupName != null && newGroupName.isNotEmpty) {
+      Group grp = await widget.loggedUser.createGroup(newGroupName);
       setState(() {
-        groups.add(newGroupName);
+        userGroups.add(grp);
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Grupo "$newGroupName" añadido')),
