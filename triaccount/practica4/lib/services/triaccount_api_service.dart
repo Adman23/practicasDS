@@ -85,4 +85,26 @@ class TriAccountService {
       throw Exception('Error in logout');
     }
   }
+
+  /// Obtiene todos los usuarios registrados desde la API
+  Future<List<User>> fetchUsers() async {
+    final token = await TokenService().getToken();
+    if (token == null) throw Exception("No auth token");
+
+    final url = Uri.parse('$apiUrl/users');
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((json) => User.fromJson(json)).toList();
+    } else {
+      throw Exception('Error al obtener usuarios: ${response.statusCode}');
+    }
+  }
 }
