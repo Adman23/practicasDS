@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'pages/home_page.dart';
+import 'pages/login_page.dart'; // Asegúrate de que el archivo exista y esté en la ruta correcta
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +15,7 @@ class TricountApp extends StatelessWidget {
     return MaterialApp(
       title: 'Triaccount',
       theme: ThemeData.dark(),
-      home: HomePage(),
+      home: LoginPage(),
     );
   }
 }
