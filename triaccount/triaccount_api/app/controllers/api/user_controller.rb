@@ -4,38 +4,38 @@ class Api::UsersController < ApiController
 
     # /api/users
     def index
-        @users = User.all
-        render json: @users.as_json(except: [:password_digest])
+        users = User.all
+        render json: users.as_json(except: [:password_digest])
     end
 
     # /api/users/id
     def show
-        render json: @user.as_json(include: :groups)
+        render json: user.as_json(include: :groups)
     end
 
     # /api/users
     def create
-        @user = User.new(user_params)
-        if @user.save
+        user = User.new(user_params)
+        if user.save
             render json: status: :created
         else
-            render json: { errors: @user.errors }, status: :unprocessable_entity
+            render json: { errors: user.errors }, status: :unprocessable_entity
         end
     end
 
     def groups
-        render json: @user.groups
+        render json: user.groups
     end
 
     # POST /api/users/id/groups
     def create_group
-        @group = Group.new(group_params)
-        if @group.save
-            @group.users << @user;
+        group = Group.new(group_params)
+        if group.save
+            group.users << user;
 
-            render json: @group.as_json(include: :users), status: :created
+            render json: group.as_json(include: :users), status: :created
         else
-            render json: {errors: @group.errors}, status: :unprocessable_entity
+            render json: {errors: group.errors}, status: :unprocessable_entity
         end
     end
 
@@ -50,7 +50,7 @@ class Api::UsersController < ApiController
     end
 
     def set_user
-        @user = User.find(params[:id])
+        user = User.find(params[:id])
     rescue ActiveRecord::RecordNotFound
         render json: {error: "Usuario no encontrado"}, status: :not_found
     end    

@@ -3,8 +3,8 @@ class Api::GroupsController < ApiController
 
     # un GET /api/groups   -> Devolver todos los grupos (no se usará tanto)
     def index
-        @groups = Group.all
-        render json: @groups
+        groups = Group.all
+        render json: groups
     end
 
     # un GET /api/groups/id -> Devolver los usuarios de un grupo
@@ -14,16 +14,16 @@ class Api::GroupsController < ApiController
 
     # un POST /api/groups/id -> Modificar los parámetros que se hayan cambiado (quizás se podría hacer aqui el cambio)
     def update
-        if @group.update(group_params)
-            render json: @group
+        if group.update(group_params)
+            render json: group
         else
-            render json: { errors: @group.errors }, status: :unprocessable_entity
+            render json: { errors: group.errors }, status: :unprocessable_entity
         end
     end
 
     # DELETE /api/groups/id
     def delete
-        if @group.destroy
+        if group.destroy
             head :ok
         else
             render json: { error: "No se pudo eliminar grupo" }, status: :unprocessable_entity
@@ -32,27 +32,27 @@ class Api::GroupsController < ApiController
 
     # GET de los users /api/groups/id/users
     def users
-        render json: @group.users
+        render json: group.users
     end
 
     # POST /api/groups/id/users/id_u
     def add_user
-        @user = User.find(params[:user_id])
-        if @user.nil?
+        user = User.find(params[:user_id])
+        if user.nil?
             render json: {error: "El usuario no existe"}, status: :unprocessable_entity
-        elsif @group.users.include?(@user)
+        elsif group.users.include?(user)
             render json: {error: "El usuario ya está en el grupo"}, status: :unprocessable_entity
         else
-            @group.users << @user
+            group.users << user
             render json: {message: "Usuario añadido", user: user.as_json}, status: :created
         end
     end
 
     # DELETE /api/groups/id/users/id_u
     def remove_user
-        @user = User.find(params[:user_id])
-        if @user && @group.users.include?(@user)
-            if @group.users.delete(@user)
+        user = User.find(params[:user_id])
+        if user && group.users.include?(user)
+            if group.users.delete(user)
                 head :ok
             else
                 render json: { error: "No se pudo eliminar usuario" }, status: :unprocessable_entity
@@ -69,6 +69,6 @@ class Api::GroupsController < ApiController
     end
 
     def set_group 
-        @group = Group.find(params[:id])
+        group = Group.find(params[:id])
     end
 end
