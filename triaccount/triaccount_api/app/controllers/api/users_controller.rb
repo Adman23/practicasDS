@@ -1,6 +1,6 @@
 class Api::UsersController < ApiController
     skip_before_action :require_login, only: [:create] # Le indica que se aplique ese except
-    before_action :set_user, only: [:show, :groups, :create_group]
+    before_action :set_user, only: [:show, :groups, :create_group, :update]
 
     # /api/users
     def index
@@ -17,11 +17,17 @@ class Api::UsersController < ApiController
     def create
         user = User.new(user_params)
         if user.save
-            render json: status: :created
+            render json: user, status: :created
         else
-            render json: { errors: user.errors }, status: :unprocessable_entity
+            render json: { errors: "NO HA PODIDO REGISTRAR" }, status: :unprocessable_entity
         end
     end
+
+    def update
+        if user.update(username: params[:username])
+            head :no_content
+        else
+            render json: {errors: "No se ha podido actualizar el username"}
 
     def groups
         render json: user.groups
@@ -32,7 +38,7 @@ class Api::UsersController < ApiController
         group = Group.new(group_params)
         if group.save
             group.users << user;
-
+t
             render json: group.as_json(include: :users), status: :created
         else
             render json: {errors: group.errors}, status: :unprocessable_entity
