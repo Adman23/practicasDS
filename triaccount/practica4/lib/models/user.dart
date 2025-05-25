@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../services/token_service.dart';
+import 'group.dart';
 
 class User{
   int? id;
@@ -58,6 +59,26 @@ class User{
       están los datos ahí. Eso se puede guardar en la interfaz teniendo un
       listado static de groups o algo así.
    */
+  Future<List<Group>> getGroups() async{
+    final token = await TokenService().getToken();
+    if (token == null) return [];
+
+    final url = Uri.parse('$apiUrl/$id/groups');
+    final response = await http.post(url,
+        headers: {'Authorization': token,
+          'Content-Type': 'application/json'});
+
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200){
+      return (data['groups'] as List<dynamic>? ?? [])
+          .map((groupJson) => Group.fromJson(groupJson as Map<String,dynamic>))
+          .toList();
+    }
+    else{
+      final errors = data['error'];
+      throw Exception("Error al obtener los grupos: $errors");
+    }
+  }
 
 
   /*
