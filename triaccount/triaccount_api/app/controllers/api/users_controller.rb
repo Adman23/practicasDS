@@ -52,7 +52,12 @@ class Api::UsersController < ApiController
         group = Group.new(group_params)
         if group.save
             group.users << @user;
-            render json: group.as_json(include: [:users, :expenses]), status: :created
+            render json: group.as_json(include: {
+            users: { except: [:password_digest, :auth_token]},
+            expenses: {
+                include: {buyer: {except: [:password_digest, :auth_token]}},
+                }
+            }), status: :created
         else
             render json: {errors: group.errors}, status: :unprocessable_entity
         end

@@ -20,7 +20,6 @@ class Expense {
   });
 
   factory Expense.fromJson(Map<String, dynamic> json) {
-    print (json);
     return Expense(
       id: json['id'] as int?,
       title: json['title'] as String,

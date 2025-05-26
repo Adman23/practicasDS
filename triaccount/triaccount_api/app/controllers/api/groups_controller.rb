@@ -69,14 +69,14 @@ class Api::GroupsController < ApiController
                 render json: { error: "No se pudo eliminar usuario" }, status: :unprocessable_entity
             end
         else
-            render json: {error: "Usuario no está en el grupo o no existe"}, status: :not_found    
+            render json: { error: "Usuario no está en el grupo o no existe"}, status: :not_found    
         end
     end
     
     private
 
     def group_params
-        params.require(:group).permit(:group_name, :balances, :refunds, :total_expense)
+        params.require(:group).permit(:group_name, :total_expense, balances: {}, refunds: {})
     end
 
     def set_group 

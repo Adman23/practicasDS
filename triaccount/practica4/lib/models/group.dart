@@ -107,28 +107,31 @@ class Group {
     // o username_email
     List<String> parts = username.split('_');
     User chosen;
+    print(username);
     if (parts.length > 1){
       String userEmail = parts[1];
-      chosen = users.where((user) => user.email == userEmail) as User;
+      chosen = users.firstWhere((user) => user.email == userEmail);
     }
     else{
-      chosen = users.where((user) => user.username == username) as User;
+      chosen = users.firstWhere((user) => user.username == username);
     }
 
     int user_id = chosen.id!;
 
     final url = Uri.parse('$apiUrl/$id/users/$user_id');
-    final response = await http.post(url,
+    final response = await http.delete(url,
         headers: {'Authorization': token,
           'Content-Type': 'application/json'}
     );
 
-    final data = jsonDecode(response.body);
     if (response.statusCode == 204){
       users.remove(chosen);
       balances.remove(username);
+      refunds.remove(username);
+      updateGroupDB();
     }
     else{
+      final data = jsonDecode(response.body);
       final errors = data['error'];
       throw Exception("No se ha podido añadir el usuario: $errors");
     }
@@ -137,7 +140,7 @@ class Group {
 
 
   /*
-    Actualiza tanto los balances como los refunds con el nuevo gasto
+    Actualiza tanto los balances como los refunds con el nuevo gastupdateGroupDBo
     Funcionamiento:
       Al buyer se le pone en los balances como +cost
       A cada uno de los participantes se le pone a los balances -part
@@ -222,23 +225,21 @@ class Group {
     if (token == null) throw  Exception("No hay sesion");
 
     final url = Uri.parse('$apiUrl/$id');
-    final response = await http.post(url,
+    final response = await http.patch(url,
         headers: {'Authorization': token,
           'Content-Type': 'application/json'},
         body: jsonEncode({
           'group': {
-            'group_name': groupName,
-            'total_expense': totalExpense,
             'balances': balances,
             'refunds': refunds,
           }
         }));
 
-    final data = jsonDecode(response.body);
     if (response.statusCode == 204){
-      // Toh bien
+      print("ACTUALIZADO");
     }
     else{
+      final data = jsonDecode(response.body);
       final errors = data['errors'];
       throw Exception("Error al modificar el grupo : $errors");
     }
@@ -283,7 +284,6 @@ class Group {
     );
 
     final data = jsonDecode(response.body);
-    print(data);
     if (response.statusCode == 201){
       Expense nuevo = Expense.fromJson(data);
       totalExpense += nuevo.cost;
