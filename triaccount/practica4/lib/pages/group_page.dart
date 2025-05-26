@@ -28,9 +28,8 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
 
   final TriAccountService apiService = TriAccountService();
 
-  Future<bool> _canRemoveUser(String name) async {
-    // Simula que no puede eliminar si es comprador de algún gasto
-    return widget.group.balances[name] != 0;
+  Future<void> _removeUser(String username) async  {
+    await widget.group.removeUser(username);
   }
 
   @override
@@ -373,8 +372,8 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                   title: Text(user),
                                   trailing: IconButton(
                                     icon: const Icon(Icons.delete, color: Colors.redAccent),
-                                    onPressed: () async {
-                                      bool canRemove = await _canRemoveUser(user);
+                                    onPressed: () {
+                                      bool canRemove = widget.group.balances[user] == 0;
                                       if (!canRemove) {
                                         showDialog(
                                           context: context,
@@ -393,7 +392,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                         return;
                                       }
                                       setState(() {
-                                          widget.group.removeUser(user);
+                                          _removeUser(user);
                                       });
                                     },
                                   ),
