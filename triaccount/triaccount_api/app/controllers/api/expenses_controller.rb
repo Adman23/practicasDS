@@ -72,8 +72,8 @@ class Api::ExpensesController < ApplicationController
         :cost,
         :date,
         :buyer_id,
-        :participants,
-        :image
+        :image,
+        participants: {},
         )
     end
 

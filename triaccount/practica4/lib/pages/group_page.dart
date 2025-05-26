@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-
 import '../models/group.dart';
 import '../models/user.dart';
 import '../services/triaccount_api_service.dart';
@@ -19,15 +17,6 @@ class GroupPage extends StatefulWidget {
 class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMixin {
 
 
-  // Gasto dummy para comprobar si un usuario puede eliminarse
-  final List<Map<String, dynamic>> dummyExpenses = [
-    {"title": "Aceite", "buyer": "Imma", "amount": 5.5, "date": DateTime(2025, 2, 17)},
-    {"title": "Arroz", "buyer": "Antonio", "amount": 2.1, "date": DateTime(2025, 2, 17)},
-    {"title": "Fideos", "buyer": "Izaro", "amount": 3.0, "date": DateTime(2025, 2, 16)},
-    {"title": "Tomate", "buyer": "Fernando", "amount": 1.5, "date": DateTime(2025, 2, 16)},
-    {"title": "Bolígrafos", "buyer": "Andres", "amount": 4.2, "date": DateTime(2025, 5, 24)},
-  ];
-
   // Todos los usuarios registrados en el sistema, cargados desde la API
   List<User> allUsers = [];
 
@@ -38,27 +27,6 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
   bool isSavingChanges = false;
 
   final TriAccountService apiService = TriAccountService();
-
-  Map<String, List<Map<String, dynamic>>> get expensesGroupedByDate {
-    Map<String, List<Map<String, dynamic>>> grouped = {};
-
-    for (var expense in dummyExpenses) {
-      DateTime date = expense["date"];
-      String formattedDate = DateFormat("d 'de' MMMM 'de' y", 'es_ES').format(date);
-      grouped.putIfAbsent(formattedDate, () => []).add(expense);
-    }
-
-    return Map.fromEntries(
-      grouped.entries.toList()
-        ..sort((a, b) {
-          DateTime dateA = dummyExpenses.firstWhere((e) =>
-          DateFormat("d 'de' MMMM 'de' y", 'es_ES').format(e["date"]) == a.key)["date"];
-          DateTime dateB = dummyExpenses.firstWhere((e) =>
-          DateFormat("d 'de' MMMM 'de' y", 'es_ES').format(e["date"]) == b.key)["date"];
-          return dateB.compareTo(dateA);
-        }),
-    );
-  }
 
   Future<bool> _canRemoveUser(String name) async {
     // Simula que no puede eliminar si es comprador de algún gasto
@@ -289,8 +257,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                   context,
                                   MaterialPageRoute(
                                     builder: (_) => AddExpensePage(
-                                      users: widget.group.users,
-                                      groupName: widget.group.groupName,
+                                      group: widget.group,
                                       groupUsers: widget.group.balances.keys.toList(),
                                     ),
                                   ),

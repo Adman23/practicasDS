@@ -44,6 +44,7 @@ class Group {
       return MapEntry(key, innerMap);
     });
 
+
     return Group(
       id: int.tryParse(json['id'].toString()),
       groupName: json['group_name'] as String,
@@ -116,13 +117,10 @@ class Group {
 
     int user_id = chosen.id!;
 
-    final url = Uri.parse('$apiUrl/$id/users');
+    final url = Uri.parse('$apiUrl/$id/users/$user_id');
     final response = await http.post(url,
         headers: {'Authorization': token,
-          'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'user_id': user_id
-        })
+          'Content-Type': 'application/json'}
     );
 
     final data = jsonDecode(response.body);
@@ -247,18 +245,28 @@ class Group {
   }
 
 
-  Future<Expense> addExpense({
-    required String title,
-    required double cost,
-    required DateTime date,
-    required User buyer,
-    required Map<User, double> participants,
-    String? photo,
-  }) async {
+  Future<Expense> addExpense(
+     String title,
+     double cost,
+     DateTime date,
+     String buyer,
+     Map<String, double> participants,
+     String? photo,
+  ) async {
     final token = await TokenService().getToken();
     if (token == null) return Expense.fromJson({});
 
-    final url = Uri.parse('$apiUrl/$id/users');
+    List<String> parts = buyer.split('_');
+    User chosen;
+    if (parts.length > 1){
+      String userEmail = parts[1];
+      chosen = users.firstWhere((user) => user.email == userEmail);
+    }
+    else{
+      chosen = users.firstWhere((user) => user.username == buyer);
+    }
+
+    final url = Uri.parse('$apiUrl/$id/expenses');
     final response = await http.post(url,
         headers: {'Authorization': token,
           'Content-Type': 'application/json'},
@@ -266,8 +274,8 @@ class Group {
           'expense': {
             'title': title,
             'cost': cost,
-            'date': date,
-            'buyer': buyer.id,
+            'date': date.toIso8601String(),
+            'buyer_id': chosen.id,
             'participants': participants,
             'image': photo
           }
@@ -275,11 +283,12 @@ class Group {
     );
 
     final data = jsonDecode(response.body);
+    print(data);
     if (response.statusCode == 201){
       Expense nuevo = Expense.fromJson(data);
       totalExpense += nuevo.cost;
       expenses.add(nuevo);
-      updateBalance(nuevo, buyer);
+      updateBalance(nuevo, chosen);
       updateGroupDB();
       return nuevo;
     }

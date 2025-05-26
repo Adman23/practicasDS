@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import '../models/group.dart';
 import '../models/user.dart';
 import '../moneyDivisorModule/DivideStrategy.dart';
 import '../moneyDivisorModule/DivideByParts.dart';
@@ -8,11 +9,10 @@ import '../moneyDivisorModule/DivideEqually.dart';
 import '../moneyDivisorModule/DivideByAmount.dart';
 
 class AddExpensePage extends StatefulWidget {
-  final String groupName;
+  final Group group;
   final List<String> groupUsers;
-  final List<User> users;
 
-  AddExpensePage({required this.users, required this.groupName, required this.groupUsers});
+  AddExpensePage({required this.group, required this.groupUsers});
 
   @override
   _AddExpensePageState createState() => _AddExpensePageState();
@@ -229,7 +229,9 @@ class _AddExpensePageState extends State<AddExpensePage> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    // Guardar gasto
+                    widget.group.addExpense(titleController.text,
+                        double.parse(amountController.text), selectedDate, selectedBuyer!,
+                        divisions, null);
                   }
                 },
                 child: const Text("Añadir Gasto"),

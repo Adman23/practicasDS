@@ -38,9 +38,14 @@ class Api::UsersController < ApiController
     end
 
     def groups
-        render json: @user.groups.as_json(include: 
-        [:users.as_json(except: [:password_digest, :auth_token]), :expenses]), status: :ok
+        render json: @user.groups.as_json(include: {
+            users: { except: [:password_digest, :auth_token]},
+            expenses: {
+                include: {buyer: {except: [:password_digest, :auth_token]}},
+            }
+        }), status: :ok
     end
+
 
     # POST /api/users/id/groups
     def create_group

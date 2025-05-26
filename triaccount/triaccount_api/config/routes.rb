@@ -22,7 +22,7 @@ Rails.application.routes.draw do
 
     resources :groups, only: [:index, :show, :update, :destroy] do # Operaciones de group
       get 'users', on: :member # El get para /api/groups/id/users -> Usuarios de un grupo
-      post 'users/:email', action: :add_user, on: :member # El post para /api/groups/id/users -> Añadir un usuario, no lo crea
+      post 'users', action: :add_user, on: :member # El post para /api/groups/id/users -> Añadir un usuario, no lo crea
       delete 'users/:user_id', action: :remove_user, on: :member # El delete para /api/groups/id/users/id
                                                                 # Aqui (no deberia) borrarlos, simplemente borra el membership
 
