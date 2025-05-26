@@ -43,7 +43,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_25_113450) do
     t.string "title"
     t.float "cost"
     t.datetime "date"
-    t.json "participants"
+    t.json "participants", default: {}
     t.integer "buyer_id", null: false
     t.integer "group_id", null: false
     t.datetime "created_at", null: false
@@ -85,7 +85,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_25_113450) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "expenses", "groups"
-  add_foreign_key "expenses", "user", column: "buyer_id"
+  add_foreign_key "expenses", "users", column: "buyer_id"
   add_foreign_key "memberships", "groups"
   add_foreign_key "memberships", "users"
 end

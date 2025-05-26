@@ -164,7 +164,7 @@ class Group {
     }
 
     ex.participants.forEach((key, value){
-      balances[key] = value - ex.cost;
+      balances[key] ;
     });
 
 
