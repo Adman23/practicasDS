@@ -225,13 +225,26 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 ],
                 onChanged: (value) => setState(() => divideStrategy = value!),
               ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () {
+                  setState(() {}); // Fuerza el recálculo y actualización visual
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text("Actualizar información"),
+              ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    widget.group.addExpense(titleController.text,
-                        double.parse(amountController.text), selectedDate, selectedBuyer!,
-                        divisions, null);
+                    widget.group.addExpense(
+                      titleController.text,
+                      double.parse(amountController.text),
+                      selectedDate,
+                      selectedBuyer!,
+                      _calculateDivision(),
+                      null,
+                    );
                   }
                 },
                 child: const Text("Añadir Gasto"),
