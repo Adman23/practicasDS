@@ -225,10 +225,43 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                           fontSize: 18, fontWeight: FontWeight.w500),
                                     ),
                                     subtitle: Text("Pagado por: ${entry.buyer.username}"),
-                                    trailing: Text(
-                                      "${entry.cost.toStringAsFixed(2)} €",
-                                      style: const TextStyle(
-                                          fontSize: 20, fontWeight: FontWeight.w600),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          "${entry.cost.toStringAsFixed(2)} €",
+                                          style: const TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        IconButton(
+                                          icon: const Icon(Icons.delete, color: Colors.redAccent),
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                title: const Text('Eliminar gasto'),
+                                                content: const Text('¿Estás seguro de que deseas eliminar este gasto?'),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () => Navigator.pop(context),
+                                                    child: const Text('Cancelar'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      // Aquí se podría ejecutar la lógica para eliminar el gasto
+                                                      Navigator.pop(context); // Por ahora, solo cerramos el diálogo
+                                                    },
+                                                    child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ],
                                     ),
                                     onTap: () {
                                       Navigator.push(
