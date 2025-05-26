@@ -7,6 +7,14 @@ import '../moneyDivisorModule/DivideStrategy.dart';
 import '../moneyDivisorModule/DivideByParts.dart';
 import '../moneyDivisorModule/DivideEqually.dart';
 import '../moneyDivisorModule/DivideByAmount.dart';
+import '../expenseFilters/FilterManager.dart';
+import '../expenseFilters/FilterChain.dart';
+import '../expenseFilters/BadWordsFilter.dart';
+import '../expenseFilters/ExpensiveWithPhotoFilter.dart';
+import '../expenseFilters/EmptyParticipantFilter.dart';
+import '../expenseFilters/FutureDateFilter.dart';
+import '../models/expense.dart';
+
 
 class AddExpensePage extends StatefulWidget {
   final Group group;
@@ -237,16 +245,54 @@ class _AddExpensePageState extends State<AddExpensePage> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
+                    final division = _calculateDivision();
+
+                    final buyerUser = widget.group.users.firstWhere(
+                          (u) => u.username == selectedBuyer,
+                      orElse: () => throw Exception("Comprador no encontrado"),
+                    );
+
+                    final expense = Expense(
+                      title: titleController.text,
+                      cost: double.tryParse(amountController.text) ?? 0.0,
+                      date: selectedDate,
+                      buyer: buyerUser,
+                      participants: division,
+                      photo: null,
+                    );
+
+                    final manager = FilterManager();
+                    final chain = FilterChain();
+
+                    chain.addFilter(BadWordsFilter());
+                    chain.addFilter(ExpensiveWithPhotoFilter());
+                    chain.addFilter(EmptyParticipantFilter());
+                    chain.addFilter(FutureDateFilter());
+
+                    chain.execute(expense, manager);
+
+                    if (manager.hasErrors()) {
+                      final errors = manager.getErrors().join('\n');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(errors),
+                          backgroundColor: Colors.redAccent,
+                        ),
+                      );
+                      return;
+                    }
+
                     widget.group.addExpense(
-                      titleController.text,
-                      double.parse(amountController.text),
-                      selectedDate,
+                      expense.title,
+                      expense.cost,
+                      expense.date,
                       selectedBuyer!,
-                      _calculateDivision(),
-                      null,
+                      division,
+                      expense.photo,
                     );
                   }
                 },
+
                 child: const Text("Añadir Gasto"),
               )
             ],
