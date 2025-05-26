@@ -1,5 +1,6 @@
-import '../models/expense.dart';
+import '../models/expense.dart'; // Ajusta según tu estructura
+import 'FilterManager.dart';
 
 abstract class Filter {
-  void execute(Expense expense);
+  void execute(Expense expense, FilterManager manager);
 }

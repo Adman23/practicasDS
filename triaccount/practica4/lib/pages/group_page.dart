@@ -161,16 +161,20 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
-            widget.group.groupName,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-          ),
-          centerTitle: true,
-          bottom: const TabBar(
-            tabs: [
+          title: Text('Group Details'),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.refresh),
+              onPressed: () async {
+                // Lógica para recargar los datos
+              },
+            ),
+          ],
+          bottom: TabBar(
+            tabs: const [
+              Tab(text: 'Resumen'),
               Tab(text: 'Gastos'),
-              Tab(text: 'Saldos'),
-              Tab(text: 'Configuración'),
+              Tab(text: 'Usuarios'),
             ],
           ),
         ),

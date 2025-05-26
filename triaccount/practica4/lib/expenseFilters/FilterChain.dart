@@ -1,24 +1,17 @@
-import 'Target.dart';
-import '../models/expense.dart';
 import 'Filter.dart';
+import '../models/expense.dart';
+import 'FilterManager.dart';
 
-class FilterChain implements Filter {
-  final List<Filter> filters = [];
-  late Target expenseTarget;
+class FilterChain {
+  final List<Filter> _filters = [];
 
   void addFilter(Filter filter) {
-    filters.add(filter);
+    _filters.add(filter);
   }
 
-  void setTarget(Target expenseTarget) {
-    this.expenseTarget = expenseTarget;
-  }
-
-  @override
-  void execute(Expense expense) {
-    for (var filter in filters) {
-      filter.execute(expense);
+  void execute(Expense expense, FilterManager manager) {
+    for (var filter in _filters) {
+      filter.execute(expense, manager);
     }
-    expenseTarget.publish(expense);
   }
 }
