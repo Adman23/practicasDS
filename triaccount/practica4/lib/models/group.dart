@@ -108,7 +108,6 @@ class Group {
     // o username_email
     List<String> parts = username.split('_');
     User chosen;
-    print(username);
     if (parts.length > 1){
       String userEmail = parts[1];
       chosen = users.firstWhere((user) => user.email == userEmail);
@@ -207,23 +206,16 @@ class Group {
       final namePos = pos.key;
       final nameNeg = neg.key;
 
-      print(namePos);
-      print(nameNeg);
-
       final amount = min(pos.value, neg.value);
-
-      print(amount);
 
       refunds[nameNeg]?[namePos] = amount;
 
-      print(refunds[nameNeg]?[namePos]);
       positive[i] = MapEntry(namePos, pos.value - amount);
       negative[j] = MapEntry(nameNeg, neg.value - amount);
 
       if (positive[i].value <= 0) i++;
       if (negative[j].value <= 0) j++;
     }
-    print(refunds);
   }
 
 
