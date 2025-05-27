@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../models/group.dart';
-import '../models/user.dart';
 import '../moneyDivisorModule/DivideStrategy.dart';
 import '../moneyDivisorModule/DivideByParts.dart';
 import '../moneyDivisorModule/DivideEqually.dart';
 import '../moneyDivisorModule/DivideByAmount.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+
 
 // Página que permite al usuario añadir un nuevo gasto dentro de un grupo
 class AddExpensePage extends StatefulWidget {
@@ -34,6 +36,8 @@ class _AddExpensePageState extends State<AddExpensePage> {
   Map<String, bool> manualEdited = {}; // Indica si el usuario modificó manualmente su cantidad. (los campos modificados no se actualizan)
   late DivideStrategy strategy;
   bool isRefund = false; // Marca si el gasto es un reembolso
+  final ImagePicker _picker = ImagePicker();
+  XFile? selectedImage;
 
   @override
   void initState() {
@@ -162,8 +166,29 @@ class _AddExpensePageState extends State<AddExpensePage> {
               ),
               // Lista de participantes y sus importes correspondientes
               const SizedBox(height: 24),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+                  if (image != null) {
+                    setState(() {
+                      selectedImage = image;
+                    });
+                  }
+                },
+                icon: const Icon(Icons.image),
+                label: const Text("Cargar imagen"),
+              ),
+              if (selectedImage != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Image.file(
+                    File(selectedImage!.path),
+                    height: 150,
+                  ),
+                ),
               const Text("Participantes", style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
+
               Column(
                 children: widget.groupUsers.map((user) {
                   double displayAmount = divisions[user] ?? 0.0;
