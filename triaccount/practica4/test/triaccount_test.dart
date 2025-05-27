@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:triaccount/models/group.dart';
 import 'package:triaccount/models/user.dart';
 import 'package:triaccount/services/triaccount_api_service.dart';
 
@@ -7,8 +8,8 @@ import 'package:triaccount/services/triaccount_api_service.dart';
 void main() {
   final service = TriAccountService();
 
-  const testUsername = 'testuser2';
-  const testEmail = 'test2@example.com';
+  const testUsername = 'testuser5';
+  const testEmail = 'test5@example.com';
   const testPhone = '1234567890';
   const testPassword = 'password123';
 
@@ -53,6 +54,29 @@ void main() {
       await service.logout();
       final user = await service.checkLogin();
       expect(user, isNull);
+    });
+  });
+
+  group('Group Test', (){
+    test('Group create and add expense', () async{
+      const testUsername = 'testuser1';
+      const testEmail = 'test1@example.com';
+      const testPassword = 'password123';
+      Map<String, double> example = {
+        testUsername: 20,
+      };
+
+
+
+      final user = await service.login(testEmail, testPassword);
+
+      final group = await user.createGroup("exampleGroup");
+
+      final expense = await group.addExpense("tituloEjemplo", 20, DateTime.now(), testUsername, example, false, null);
+
+      expect(group.expenses.first, expense);
+
+      user.deleteGroup(group.id);
     });
   });
 }
