@@ -10,12 +10,10 @@ class DivideByAmount extends DivideStrategy {
   Map<String, double> calculateDivision(Map<String, int> participation, double total) {
     final selectedUsers = participation.keys.where((k) => participation[k]! >= 1).toList();
 
-    // Total already manually assigned
     final manuallyAssigned = userCustomAmounts.entries
         .where((e) => selectedUsers.contains(e.key))
         .fold<double>(0.0, (sum, e) => sum + e.value);
 
-    // Users who didn't receive manual assignment
     final autoUsers = selectedUsers
         .where((u) => !userCustomAmounts.containsKey(u))
         .toList();

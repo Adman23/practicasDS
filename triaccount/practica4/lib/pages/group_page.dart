@@ -333,8 +333,20 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                             ? Colors.red
                             : Colors.grey;
 
-                        // Refunds del usuario si existen
-                        final refundsMap = _group.refunds[person] ?? {};
+                        // Refunds: a quién le debe esta persona
+                        final refundsOwed = <String, double>{};
+                        _group.refunds.forEach((creditor, debtors) {
+                          if (debtors.containsKey(person)) {
+                            refundsOwed[creditor] = debtors[person]!;
+                          }
+                        });
+
+                        // Refunds: quién le debe a esta persona
+                        final refundsReceived = _group.refunds[person] ?? {};
+
+                        // Si hay algo que mostrar
+                        final bool hasRefunds = refundsOwed.isNotEmpty || refundsReceived.isNotEmpty;
+
                         bool showRefunds = false;
 
                         return StatefulBuilder(
@@ -342,6 +354,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                // Tarjeta de saldo principal
                                 Card(
                                   color: Colors.grey[900],
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -364,8 +377,8 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                   ),
                                 ),
 
-                                // Botón para mostrar/ocultar devoluciones
-                                if (refundsMap.isNotEmpty)
+                                // Botón para mostrar devoluciones
+                                if (hasRefunds)
                                   Padding(
                                     padding: const EdgeInsets.only(left: 12.0),
                                     child: TextButton.icon(
@@ -379,18 +392,29 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                     ),
                                   ),
 
-                                // Detalle de devoluciones
-                                if (showRefunds && refundsMap.isNotEmpty)
+                                // Detalle de devoluciones (deudas y acreencias)
+                                if (showRefunds)
                                   Padding(
-                                    padding: const EdgeInsets.only(left: 32.0, bottom: 12.0),
+                                    padding: const EdgeInsets.only(left: 32.0, bottom: 12.0, right: 16.0),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: refundsMap.entries.map((entry) {
-                                        return Text(
-                                          '→ Debe a ${entry.key}: ${entry.value.toStringAsFixed(2)} €',
-                                          style: const TextStyle(fontSize: 14, color: Colors.white70),
-                                        );
-                                      }).toList(),
+                                      children: [
+                                        if (refundsOwed.isNotEmpty) ...[
+                                          const Text('→ Deudas:', style: TextStyle(color: Colors.white60)),
+                                          ...refundsOwed.entries.map((entry) => Text(
+                                            '• Debe a ${entry.key}: ${entry.value.toStringAsFixed(2)} €',
+                                            style: const TextStyle(fontSize: 14, color: Colors.white70),
+                                          )),
+                                        ],
+                                        if (refundsReceived.isNotEmpty) ...[
+                                          const SizedBox(height: 8),
+                                          const Text('→ Le deben:', style: TextStyle(color: Colors.white60)),
+                                          ...refundsReceived.entries.map((entry) => Text(
+                                            '• ${entry.key} le debe: ${entry.value.toStringAsFixed(2)} €',
+                                            style: const TextStyle(fontSize: 14, color: Colors.white70),
+                                          )),
+                                        ],
+                                      ],
                                     ),
                                   ),
                               ],
