@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/expense.dart';
 import '../models/group.dart';
 import '../models/user.dart';
 import '../services/triaccount_api_service.dart';
@@ -27,15 +28,17 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
   bool isSavingChanges = false;
 
   final TriAccountService apiService = TriAccountService();
-
-  Future<void> _removeUser(String username) async  {
-    await widget.group.removeUser(username);
-  }
+  late Group _group;
 
   @override
   void initState() {
     super.initState();
+    _group = widget.group;
     _loadAllUsers();
+  }
+
+  Future<void> _removeUser(String username) async  {
+    await _group.removeUser(username);
   }
 
   Future<void> _loadAllUsers() async {
@@ -62,7 +65,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
       context: context,
       builder: (context) {
         // Usuarios que no están aún en el grupo
-        final List<User> usersNotInGroup = allUsers.where((u) => !widget.group.users.any((gu) => gu.username == u.username)).toList();
+        final List<User> usersNotInGroup = allUsers.where((u) => !_group.users.any((gu) => gu.username == u.username)).toList();
 
         return StatefulBuilder(
           builder: (context, setStateDialog) {
@@ -112,7 +115,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                     setState(() {
                       // Añadir usuarios seleccionados al grupo con amount 0
                       for (var user in selectedUsersToAdd) {
-                        widget.group.inviteUser(user.email);
+                        _group.inviteUser(user.email);
                       }
                       selectedUsersToAdd.clear();
                     });
@@ -161,7 +164,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            widget.group.groupName,
+            _group.groupName,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
           ),
           centerTitle: true,
@@ -181,7 +184,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Center(
                 child: Text(
-                  "Gastos Totales: ${widget.group.totalExpense.toStringAsFixed(2)} €",
+                  "Gastos Totales: ${_group.totalExpense.toStringAsFixed(2)} €",
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -201,9 +204,9 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                         // Lista principal de gastos
                         ListView.builder(
                           padding: const EdgeInsets.only(bottom: 80), // Espacio para el botón
-                          itemCount: widget.group.expenses.length,
+                          itemCount: _group.expenses.length,
                           itemBuilder: (context, index) {
-                            final entry = widget.group.expenses[index];
+                            final entry = _group.expenses[index];
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -262,7 +265,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                         ),
                                       ],
                                     ),
-                                    onTap: () {
+                                    onTap: () async {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -284,16 +287,18 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                           right: 0,
                           child: Center(
                             child: FloatingActionButton(
-                              onPressed: () {
-                                Navigator.push(
+                              onPressed: () async {
+                                final addEx = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => AddExpensePage(
-                                      group: widget.group,
-                                      groupUsers: widget.group.balances.keys.toList(),
+                                    builder: (context) => AddExpensePage(
+                                      group: _group,
+                                      groupUsers: _group.balances.keys.toList(),
                                     ),
                                   ),
                                 );
+                                await addEx();
+                                setState(() {});
                               },
                               backgroundColor: Colors.grey[900],
                               child: const Icon(Icons.add, size: 32),
@@ -309,10 +314,10 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
                     child: ListView.builder(
-                      itemCount: widget.group.balances.keys.length,
+                      itemCount: _group.balances.keys.length,
                       itemBuilder: (context, index) {
-                        final person = widget.group.balances.keys.elementAt(index);
-                        final double? amount = widget.group.balances[person];
+                        final person = _group.balances.keys.elementAt(index);
+                        final double? amount = _group.balances[person];
                         final bool isPositive = amount! >= 0;
 
                         return Card(
@@ -356,9 +361,9 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                         const SizedBox(height: 12),
                         Expanded(
                           child: ListView.builder(
-                            itemCount: widget.group.balances.keys.length,
+                            itemCount: _group.balances.keys.length,
                             itemBuilder: (context, index) {
-                              final user = widget.group.balances.keys.elementAt(index);
+                              final user = _group.balances.keys.elementAt(index);
                               return Card(
                                 margin: const EdgeInsets.symmetric(vertical: 6),
                                 shape: RoundedRectangleBorder(
@@ -369,7 +374,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                   trailing: IconButton(
                                     icon: const Icon(Icons.delete, color: Colors.redAccent),
                                     onPressed: () {
-                                      bool canRemove = widget.group.balances[user] == 0;
+                                      bool canRemove = _group.balances[user] == 0;
                                       if (!canRemove) {
                                         showDialog(
                                           context: context,

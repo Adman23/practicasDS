@@ -237,14 +237,14 @@ class _AddExpensePageState extends State<AddExpensePage> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    widget.group.addExpense(
+                    Navigator.of(context).pop(() async {await widget.group.addExpense(
                       titleController.text,
                       double.parse(amountController.text),
                       selectedDate,
                       selectedBuyer!,
                       _calculateDivision(),
                       null,
-                    );
+                    );});
                   }
                 },
                 child: const Text("Añadir Gasto"),

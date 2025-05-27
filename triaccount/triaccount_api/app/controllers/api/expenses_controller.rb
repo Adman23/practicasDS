@@ -22,7 +22,7 @@ class Api::ExpensesController < ApplicationController
             if params[:image]
                 expense.image.attach(params[:image])
             end
-            render json: expense.as_json, status: :created
+            render json: expense.as_json(include: {buyer: {except: [:password_digest, :auth_token]}}), status: :created
         else
             render json: { errors: expense.errors }, status: :unprocessable_entity
         end
