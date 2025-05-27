@@ -171,9 +171,9 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
           ],
           bottom: TabBar(
             tabs: const [
-              Tab(text: 'Gestos'),
+              Tab(text: 'Gastos'),
               Tab(text: 'Saldos'),
-              Tab(text: 'Configuración'),
+              Tab(text: 'Usuarios'),
             ],
           ),
         ),

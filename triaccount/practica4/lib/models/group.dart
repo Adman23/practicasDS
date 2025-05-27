@@ -92,6 +92,7 @@ class Group {
       users.add(newUser);
       balances[newKey] = 0;
       refunds[newKey] = {};
+      updateGroupDB();
     }
     else{
       final errors = data['error'];
@@ -184,13 +185,11 @@ class Group {
       } else if (amount < 0) {
         negative.add(MapEntry(name, amount.abs()));
       }
+      refunds[name] = {};
     });
 
     // Se asigna las mismas keys que hay en balances positivos
     // Ya que serán los que reciben
-    for (var p in positive) {
-      refunds[p.key] = {};
-    }
 
     /*
       Se van cogiendo los minimos entre cada uno de los positivos y de los
@@ -208,15 +207,23 @@ class Group {
       final namePos = pos.key;
       final nameNeg = neg.key;
 
+      print(namePos);
+      print(nameNeg);
+
       final amount = min(pos.value, neg.value);
 
-      refunds[namePos]?[nameNeg] = amount;
+      print(amount);
+
+      refunds[nameNeg]?[namePos] = amount;
+
+      print(refunds[nameNeg]?[namePos]);
       positive[i] = MapEntry(namePos, pos.value - amount);
       negative[j] = MapEntry(nameNeg, neg.value - amount);
 
       if (positive[i].value <= 0) i++;
       if (negative[j].value <= 0) j++;
     }
+    print(refunds);
   }
 
 
