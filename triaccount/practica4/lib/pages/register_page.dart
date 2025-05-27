@@ -18,6 +18,7 @@ class _RegisterPageState extends State<RegisterPage> {
   bool isLoading = false;
   String? errorMessage;
 
+  // Función que maneja el registro de usuario
   void _handleRegister() async {
     setState(() {
       isLoading = true;
@@ -25,6 +26,7 @@ class _RegisterPageState extends State<RegisterPage> {
     });
 
     try {
+      // Intenta registrar al usuario con los datos proporcionados
       await apiService.registerUser(
         usernameController.text.trim(),
         emailController.text.trim(),
@@ -33,24 +35,27 @@ class _RegisterPageState extends State<RegisterPage> {
         passwordConfirmationController.text,
       );
 
-      // Registro exitoso: volver al login con mensaje opcional
+      // Si el registro es exitoso, vuelve a la pantalla de login
       if (mounted) {
-        Navigator.pop(context); // Regresa a login
+        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Registro exitoso. Inicia sesión.')),
         );
       }
     } catch (e) {
+      // Captura y muestra el mensaje de error
       setState(() {
         errorMessage = e.toString();
       });
     } finally {
+      // Desactiva el estado de carga
       setState(() {
         isLoading = false;
       });
     }
   }
 
+  // Construye la interfaz de usuario
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,6 +77,8 @@ class _RegisterPageState extends State<RegisterPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 24),
+
+              // Campo: Nombre de usuario
               TextField(
                 controller: usernameController,
                 decoration: const InputDecoration(
@@ -80,6 +87,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
               const SizedBox(height: 16),
+
+              // Campo: Email
               TextField(
                 controller: emailController,
                 decoration: const InputDecoration(
@@ -89,6 +98,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 16),
+
+              // Campo: Teléfono
               TextField(
                 controller: phoneController,
                 decoration: const InputDecoration(
@@ -98,15 +109,19 @@ class _RegisterPageState extends State<RegisterPage> {
                 keyboardType: TextInputType.phone,
               ),
               const SizedBox(height: 16),
+
+              // Campo: Contraseña
               TextField(
                 controller: passwordController,
                 decoration: const InputDecoration(
                   labelText: 'Contraseña',
                   border: OutlineInputBorder(),
                 ),
-                obscureText: true,
+                obscureText: true, // Oculta el texto
               ),
               const SizedBox(height: 16),
+
+              // Campo: Confirmación de contraseña
               TextField(
                 controller: passwordConfirmationController,
                 decoration: const InputDecoration(
@@ -116,14 +131,18 @@ class _RegisterPageState extends State<RegisterPage> {
                 obscureText: true,
               ),
               const SizedBox(height: 24),
+
+              // Si hay error, se muestra
               if (errorMessage != null)
                 Text(
                   errorMessage!,
                   style: const TextStyle(color: Colors.red),
                   textAlign: TextAlign.center,
                 ),
+
+              // Botón de registro
               ElevatedButton(
-                onPressed: isLoading ? null : _handleRegister,
+                onPressed: isLoading ? null : _handleRegister, // Desactivado si está cargando
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey[900],
                   padding: const EdgeInsets.symmetric(vertical: 14),
