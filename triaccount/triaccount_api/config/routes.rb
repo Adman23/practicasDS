@@ -15,7 +15,7 @@ Rails.application.routes.draw do
     delete "logout", to: "sessions#destroy"
     get 'retrieve_user', to: "users#retrieve_user"
 
-    resources :users, only: [:create, :index, :show] do # GETs de index y show para ver todos los users y ver uno solo
+    resources :users, only: [:create, :index, :show, :destroy] do # GETs de index y show para ver todos los users y ver uno solo
       get 'groups', on: :member # El get para /api/users/id/groups -> grupos de un usuario
       post 'groups', action: :create_group, on: :member # El post para /users/id/groups
       delete 'groups/:group_id', action: :destroy_group, on: :member # El delete para /users/id/groups/id -> Borrar un grupo de un usuario

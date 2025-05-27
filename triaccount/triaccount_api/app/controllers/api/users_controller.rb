@@ -1,6 +1,6 @@
 class Api::UsersController < ApiController
     skip_before_action :require_login, only: [:create] # Le indica que se aplique ese except
-    before_action :set_user, only: [:show, :groups, :create_group, :update, :destroy_group]
+    before_action :set_user, only: [:show, :groups, :create_group, :update, :destroy_group, :destroy]
 
     # /api/users
     def index
@@ -28,6 +28,16 @@ class Api::UsersController < ApiController
             render json: { errors: "NO HA PODIDO REGISTRAR" }, status: :unprocessable_entity
         end
     end
+
+    # delete api/users/id
+    def destroy
+        if @user.destroy
+            head :no_content
+        else
+            render json: { errors: @user.errors }, status: :unprocessable_entity
+        end
+    end
+        
 
     def update
         if @user.update(username: params[:username])
