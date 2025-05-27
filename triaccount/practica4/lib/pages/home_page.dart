@@ -6,6 +6,7 @@ import '../services/triaccount_api_service.dart';
 import 'login_page.dart';
 import 'add_group_page.dart';
 
+// Página principal tras iniciar sesión, donde se gestionan los grupos del usuario.
 class HomePage extends StatefulWidget {
   final User loggedUser;
   const HomePage({super.key, required this.loggedUser});
@@ -19,13 +20,15 @@ class _HomePageState extends State<HomePage> {
 
   final TriAccountService apiService = TriAccountService();
   static List<Group> userGroups = [];
+
+  // Al iniciar el widget, se obtienen los grupos del usuario.
   @override
   void initState(){
     super.initState();
     _obtainGroups();
   }
 
-  // Inicializar los grupos, se lanza en el constructor
+  // Obtiene los grupos desde el modelo del usuario y fuerza actualización del estado.
   void _obtainGroups() async {
     userGroups = await widget.loggedUser.getGroups();
     setState(() {
@@ -33,6 +36,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // Cierra sesión: llama al API, limpia los grupos y navega a la pantalla de login.
   void _handleLogout(BuildContext context) async {
     try {
       await apiService.logout();
@@ -49,6 +53,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Abre la pantalla para añadir un nuevo grupo y lo añade a la lista si fue creado.
   void _navigateToAddGroup() async {
     final newGroupName = await Navigator.push<String>(
       context,
@@ -66,6 +71,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Construye la interfaz visual del HomePage.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,6 +86,7 @@ class _HomePageState extends State<HomePage> {
         ),
         centerTitle: true,
         actions: [
+          // Botón en la AppBar para cerrar sesión.
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Cerrar sesión',
@@ -101,6 +108,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(height: 12),
+            // Lista expandible que muestra cada grupo en una tarjeta.
             Expanded(
               child: ListView.builder(
                 itemCount: userGroups.length,
@@ -112,11 +120,61 @@ class _HomePageState extends State<HomePage> {
                     elevation: 3,
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      // Nombre del grupo como título principal.
                       title: Text(
                         userGroups[index].groupName,
                         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                       ),
-                      trailing: Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey[400]),
+                      // En el extremo derecho de cada grupo se muestra un botón para eliminarlo y un icono para navegar.
+                      // Al pulsar el botón de eliminar, se muestra un cuadro de diálogo de confirmación.
+                      // Si el usuario confirma, el grupo se elimina visualmente de la lista (solo en la interfaz),
+                      // luego se puede aplicar la lógica de eliminación real, y se muestra un mensaje de éxito.
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Botón de eliminación de grupo
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red[400]),
+                            tooltip: 'Eliminar grupo',
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                // Cuadro de diálogo de confirmación
+                                builder: (context) => AlertDialog(
+                                  title: const Text('¿Estás seguro?'),
+                                  content: const Text('¿Quieres eliminar este grupo?'),
+                                  actions: [
+                                    TextButton(
+                                      child: const Text('Cancelar'),
+                                      onPressed: () => Navigator.pop(context),
+                                    ),
+                                    TextButton(
+                                      child: const Text('Confirmar'),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        setState(() {
+                                          userGroups.removeAt(index); // Eliminar visualmente
+                                        });
+
+                                        // Aplicar lógica de eliminación
+
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Grupo eliminado con éxito'),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                          // Icono para navegar a la página del grupo correspondiente.
+                          Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey[400]),
+                        ],
+                      ),
+                      // Al pulsar sobre el grupo, se abre la pantalla con el detalle del grupo.
                       onTap: () {
                         Navigator.push(
                           context,
@@ -133,6 +191,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
+      // Botón para añadir un nuevo grupo.
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToAddGroup,
         backgroundColor: Colors.grey[900],
