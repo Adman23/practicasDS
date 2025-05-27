@@ -10,7 +10,7 @@ class ExpensiveWithPhotoFilter implements Filter {
     final cost = request['cost'] as double? ?? 0.0;
     final image = request['image'];
     if (cost > threshold && (image == null || image.toString().isEmpty)) {
-      throw Exception("Los gastos mayores de \$${threshold.toStringAsFixed(2)} requieren una foto.");
+      throw Exception("Los gastos mayores a \$${threshold.toStringAsFixed(2)} requieren una foto.");
     }
   }
 }

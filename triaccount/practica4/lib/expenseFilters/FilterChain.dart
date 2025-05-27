@@ -9,7 +9,7 @@ class FilterChain {
 
   void execute(Map<String, dynamic> request) {
     for (final filter in _filters) {
-      filter.execute(request); // Puede lanzar excepción si falla
+      filter.execute(request);
     }
   }
 }
