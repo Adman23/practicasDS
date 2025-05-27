@@ -11,12 +11,7 @@ class ExpenseDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final formattedDate = DateFormat("d 'de' MMMM 'de' y", 'es_ES').format(expense.date);
-
-    final List<Map<String, dynamic>> participants = [
-      {"name": "Andres", "amount": 1.83},
-      {"name": "Antonio", "amount": 1.83},
-      {"name": "Izaro", "amount": 1.84},
-    ];
+    
 
     return Scaffold(
       appBar: AppBar(title: Text("")),
@@ -93,9 +88,9 @@ class ExpenseDetailPage extends StatelessWidget {
             // Lista de participantes
             Expanded(
               child: ListView.builder(
-                itemCount: participants.length,
+                itemCount: expense.participants.length,
                 itemBuilder: (context, index) {
-                  final p = participants[index];
+                  final p = expense.participants.keys.elementAt(index);
                   return Card(
                     color: Colors.grey[900],
                     shape: RoundedRectangleBorder(
@@ -106,11 +101,11 @@ class ExpenseDetailPage extends StatelessWidget {
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       title: Text(
-                        p["name"],
+                        p,
                         style: const TextStyle(fontSize: 20),
                       ),
                       trailing: Text(
-                        "${p["amount"].toStringAsFixed(2)} €",
+                        "${expense.participants[p]?.toStringAsFixed(2)} €",
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 20,

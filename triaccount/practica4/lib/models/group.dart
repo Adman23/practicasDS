@@ -167,7 +167,7 @@ class Group {
     }
 
     ex.participants.forEach((key, value){
-      balances[key] ;
+      balances[key] = balances[key]! - value;
     });
 
 

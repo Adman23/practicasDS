@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../models/expense.dart';
 import '../models/group.dart';
 import '../models/user.dart';
 import '../services/triaccount_api_service.dart';
@@ -109,16 +108,13 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                   child: const Text('Cancelar'),
                 ),
                 ElevatedButton(
-                  onPressed: selectedUsersToAdd.isEmpty
-                      ? null
-                      : () {
-                    setState(() {
-                      // Añadir usuarios seleccionados al grupo con amount 0
-                      for (var user in selectedUsersToAdd) {
-                        _group.inviteUser(user.email);
-                      }
-                      selectedUsersToAdd.clear();
-                    });
+                  onPressed: selectedUsersToAdd.isEmpty? null : () async {
+                    // Añadir usuarios seleccionados al grupo con amount 0
+                    for (var user in selectedUsersToAdd) {
+                      await _group.inviteUser(user.email);
+                    }
+                    selectedUsersToAdd.clear();
+                    setState(() {});
                     Navigator.pop(context);
                   },
                   child: const Text('Añadir'),
@@ -137,8 +133,9 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
     });
 
     try {
-      // Aquí harías la llamada a la API para actualizar usuarios del grupo:
-      // por ejemplo, enviar la lista actualizada de usuarios en groupUsers al backend.
+      // Aquí se haría un botón de refresh para obtener cambios de la bd que
+      // puede que no hubiera, en teoría no es necesario guardar nada
+      // porque se va guardando sobre la marcha
 
       // Simulamos espera
       await Future.delayed(const Duration(seconds: 1));
@@ -252,9 +249,11 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                                 content: const Text('¿Estás seguro de que deseas eliminar este gasto?'),
                                                 actions: [
                                                   TextButton(
-                                                    onPressed: () => Navigator.pop(context),
+                                                    onPressed: () => {
+                                                      Navigator.pop(context)
+                                                    },
                                                     child: const Text('Cancelar'),
-                                                  ),
+                                                    ),
                                                   TextButton(
                                                     onPressed: () {
                                                       // Aquí se podría ejecutar la lógica para eliminar el gasto
@@ -377,7 +376,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                   title: Text(user),
                                   trailing: IconButton(
                                     icon: const Icon(Icons.delete, color: Colors.redAccent),
-                                    onPressed: () {
+                                    onPressed: () async {
                                       bool canRemove = _group.balances[user] == 0;
                                       if (!canRemove) {
                                         showDialog(
@@ -396,9 +395,8 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                         );
                                         return;
                                       }
-                                      setState(() {
-                                          _removeUser(user);
-                                      });
+                                      await _removeUser(user);
+                                      setState(() {});
                                     },
                                   ),
                                 ),
