@@ -127,4 +127,28 @@ class TriAccountService {
       throw Exception('Error al obtener usuarios: ${response.statusCode}');
     }
   }
+
+  // Destruye un usuario
+  Future<void> deleteUser(id) async {
+    final token = await TokenService().getToken();
+    if (token == null) throw Exception("No auth token");
+
+    final url = Uri.parse('$apiUrl/users/$id');
+    final response = await http.delete(
+      url,
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 204){
+      // BIEN
+    }
+    else{
+      final data = jsonDecode(response.body);
+      final errors = data['errors'];
+      throw Exception('Se ha producido un error al destruir el usuario: $errors');
+    }
+  }
 }
