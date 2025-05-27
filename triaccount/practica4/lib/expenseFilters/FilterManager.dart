@@ -1,21 +1,11 @@
-import 'package:triaccount/models/expense.dart';
-
-import 'FilterChain.dart';
-import 'Target.dart';
-import 'Filter.dart';
 class FilterManager {
-  late FilterChain filterChain;
+  final List<String> _errors = [];
 
-  FilterManager(Target target) {
-    filterChain = FilterChain();
-    filterChain.setTarget(target);
+  void addError(String error) {
+    _errors.add(error);
   }
 
-  void addFilter(Filter filter) {
-    filterChain.addFilter(filter);
-  }
+  bool hasErrors() => _errors.isNotEmpty;
 
-  void publish(Expense expense) {
-    filterChain.execute(expense);
-  }
+  List<String> getErrors() => _errors;
 }
