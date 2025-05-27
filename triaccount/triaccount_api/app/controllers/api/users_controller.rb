@@ -1,6 +1,6 @@
 class Api::UsersController < ApiController
     skip_before_action :require_login, only: [:create] # Le indica que se aplique ese except
-    before_action :set_user, only: [:show, :groups, :create_group, :update]
+    before_action :set_user, only: [:show, :groups, :create_group, :update, :destroy_group]
 
     # /api/users
     def index
@@ -62,6 +62,17 @@ class Api::UsersController < ApiController
             render json: {errors: group.errors}, status: :unprocessable_entity
         end
     end
+
+    # DELETE /api/users/id/groups/group_id
+    def destroy_group
+        group = @user.groups.find(params[:group_id])
+        if group.destroy
+            head :no_content
+        else
+            render json: { errors: group.errors }, status: :unprocessable_entity
+        end
+    end
+
 
     private
 

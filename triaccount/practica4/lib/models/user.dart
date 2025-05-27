@@ -120,4 +120,25 @@ class User{
       throw Exception('Error al crear el grupo: $errors');
     }
   }
+
+
+
+  Future<void> deleteGroup(group_id) async {
+    final token = await TokenService().getToken();
+    if (token == null) throw  Exception("No hay sesion");
+
+    final url = Uri.parse('$apiUrl/$id/groups/$group_id');
+    final response = await http.delete(url,
+        headers: {'Authorization': token,
+        'Content-Type': 'application/json'});
+
+    if (response.statusCode == 204){
+      // BIEN
+    }
+    else{
+      final data = jsonDecode(response.body);
+      final errors = data['errors'];
+      throw Exception("Error al eliminar el grupo: $errors");
+    }
+  }
 }

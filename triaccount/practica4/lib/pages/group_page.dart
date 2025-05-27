@@ -64,7 +64,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
       context: context,
       builder: (context) {
         // Usuarios que no están aún en el grupo
-        final List<User> usersNotInGroup = allUsers.where((u) => !_group.users.any((gu) => gu.username == u.username)).toList();
+        final List<User> usersNotInGroup = allUsers.where((u) => !_group.users.any((gu) => gu.id == u.id)).toList();
 
         return StatefulBuilder(
           builder: (context, setStateDialog) {

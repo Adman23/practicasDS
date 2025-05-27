@@ -152,12 +152,12 @@ class _HomePageState extends State<HomePage> {
                                       child: const Text('Confirmar'),
                                       onPressed: () {
                                         Navigator.pop(context);
-                                        setState(() {
-                                          userGroups.removeAt(index); // Eliminar visualmente
-                                        });
+                                        // Eliminar Grupo usando métod apropiado
+                                        widget.loggedUser.deleteGroup(userGroups.elementAt(index).id);
+                                        userGroups.removeAt(index);
 
+                                        setState(() {});
                                         // Aplicar lógica de eliminación
-
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           const SnackBar(
                                             content: Text('Grupo eliminado con éxito'),

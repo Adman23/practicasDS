@@ -268,7 +268,9 @@ class Group {
       });
       updateBalance(ex, ex.buyer);
       expenses.remove(ex);
-      totalExpense += ex.cost;
+      if (!ex.isRefund) {
+        totalExpense += ex.cost;
+      }
       updateGroupDB();
     }
     else{
@@ -285,6 +287,7 @@ class Group {
       DateTime date,
       String buyer,
       Map<String, double> participants,
+      bool isRefund,
       String? photo,
       ) async {
     final token = await TokenService().getToken();
@@ -307,7 +310,8 @@ class Group {
       'date': date,
       'buyer': buyer,
       'participants': participants,
-      'image': photo
+      'image': photo,
+      'is_refund': isRefund,
     };
 
     final filterManager = FilterManager()
@@ -335,7 +339,8 @@ class Group {
             'date': date.toIso8601String(),
             'buyer_id': chosen.id,
             'participants': participants,
-            'image': photo
+            'image': photo,
+            'is_refund': isRefund,
           }
         })
     );
@@ -343,7 +348,9 @@ class Group {
     final data = jsonDecode(response.body);
     if (response.statusCode == 201){
       Expense nuevo = Expense.fromJson(data);
-      totalExpense += nuevo.cost;
+      if (!nuevo.isRefund) {
+        totalExpense += nuevo.cost;
+      }
       expenses.insert(0, nuevo);
       updateBalance(nuevo, chosen);
       updateGroupDB();

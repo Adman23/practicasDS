@@ -18,6 +18,7 @@ Rails.application.routes.draw do
     resources :users, only: [:create, :index, :show] do # GETs de index y show para ver todos los users y ver uno solo
       get 'groups', on: :member # El get para /api/users/id/groups -> grupos de un usuario
       post 'groups', action: :create_group, on: :member # El post para /users/id/groups
+      delete 'groups/:group_id', action: :destroy_group, on: :member # El delete para /users/id/groups/id -> Borrar un grupo de un usuario
     end
 
     resources :groups, only: [:index, :show, :update, :destroy] do # Operaciones de group
