@@ -73,6 +73,7 @@ class Api::ExpensesController < ApplicationController
         :date,
         :buyer_id,
         :image,
+        :is_refund,
         participants: {},
         )
     end

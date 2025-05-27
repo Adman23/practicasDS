@@ -1,6 +1,4 @@
 import 'Filter.dart';
-import '../models/expense.dart';
-import 'FilterManager.dart';
 
 class FilterChain {
   final List<Filter> _filters = [];
@@ -9,9 +7,9 @@ class FilterChain {
     _filters.add(filter);
   }
 
-  void execute(Expense expense, FilterManager manager) {
-    for (var filter in _filters) {
-      filter.execute(expense, manager);
+  void execute(Map<String, dynamic> request) {
+    for (final filter in _filters) {
+      filter.execute(request);
     }
   }
 }

@@ -8,6 +8,7 @@ class Expense {
   User buyer;
   Map<String, double> participants;
   String? photo;
+  bool isRefund;
 
   Expense({
     this.id,
@@ -17,6 +18,7 @@ class Expense {
     required this.buyer,
     required this.participants,
     this.photo,
+    this.isRefund=false,
   });
 
   factory Expense.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,7 @@ class Expense {
         double.tryParse(value.toString()) ?? 0.0,
       )),
       photo: json['photo'] as String?,
+      isRefund: json['is_refund'] ?? false,
     );
   }
 

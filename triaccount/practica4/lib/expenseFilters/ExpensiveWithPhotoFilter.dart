@@ -1,14 +1,16 @@
 import 'Filter.dart';
-import '../models/expense.dart';
-import 'FilterManager.dart';
 
 class ExpensiveWithPhotoFilter implements Filter {
-  static const double expensiveThreshold = 100.0;
+  final double threshold;
+
+  ExpensiveWithPhotoFilter({this.threshold = 50.0});
 
   @override
-  void execute(Expense expense, FilterManager manager) {
-    if (expense.cost > expensiveThreshold && (expense.photo == null || expense.photo!.isEmpty)) {
-      manager.addError('Gastos mayores de 100€ requieren incluir una foto como comprobante.');
+  void execute(Map<String, dynamic> request) {
+    final cost = request['cost'] as double? ?? 0.0;
+    final image = request['image'];
+    if (cost > threshold && (image == null || image.toString().isEmpty)) {
+      throw Exception("Los gastos mayores a \$${threshold.toStringAsFixed(2)} requieren una foto.");
     }
   }
 }

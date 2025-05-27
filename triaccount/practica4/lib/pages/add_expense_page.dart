@@ -8,8 +8,11 @@ import '../moneyDivisorModule/DivideByParts.dart';
 import '../moneyDivisorModule/DivideEqually.dart';
 import '../moneyDivisorModule/DivideByAmount.dart';
 
+// Página que permite al usuario añadir un nuevo gasto dentro de un grupo
 class AddExpensePage extends StatefulWidget {
+  // Grupo al que se añadirá el gasto.
   final Group group;
+  // Lista de usuarios del grupo.
   final List<String> groupUsers;
 
   AddExpensePage({required this.group, required this.groupUsers});
@@ -24,28 +27,30 @@ class _AddExpensePageState extends State<AddExpensePage> {
   final amountController = TextEditingController();
   String? selectedBuyer;
   DateTime selectedDate = DateTime.now();
-  Map<String, bool> participantSelected = {};
+  Map<String, bool> participantSelected = {}; // Diccionario que indica si cada usuario está participando en el gasto
   String divideStrategy = 'equally';
-  Map<String, int> partsCount = {};
-  Map<String, double> manualAmounts = {};
-  Map<String, bool> manualEdited = {};
+  Map<String, int> partsCount = {}; // Número de partes por usuario (para estrategia "por partes")
+  Map<String, double> manualAmounts = {}; // Cantidades asignadas manualmente (estrategia by amount)
+  Map<String, bool> manualEdited = {}; // Indica si el usuario modificó manualmente su cantidad. (los campos modificados no se actualizan)
   late DivideStrategy strategy;
+  bool isRefund = false; // Marca si el gasto es un reembolso
 
-  bool isRefund = false;
   @override
   void initState() {
     super.initState();
 
+    // Inicializa datos por usuario: todos están seleccionados y con valores por defecto
     for (var user in widget.groupUsers) {
       participantSelected[user] = true;
       partsCount[user] = 1;
       manualAmounts[user] = 0.0;
       manualEdited[user] = false;
     }
-    selectedBuyer = widget.groupUsers.first;
+    selectedBuyer = widget.groupUsers.first; // El comprador por defecto es el primero
     strategy = DivideEqually();
   }
 
+  // Abre el selector de fecha y actualiza la fecha elegida
   void _pickDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -58,6 +63,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
     }
   }
 
+  // Actualiza la estrategia seleccionada
   void _updateStrategy(String strategyName) {
     switch (strategyName) {
       case 'by parts':
@@ -71,16 +77,18 @@ class _AddExpensePageState extends State<AddExpensePage> {
     }
   }
 
+  // Calcula la división del gasto de entre los participantes segun la estrategia seleccionada
   Map<String, double> _calculateDivision() {
     final total = double.tryParse(amountController.text) ?? 0.0;
+    // Construye el mapa de participación (usuarios activos y sus partes o 1)
     final participation = <String, int>{};
-
     for (var user in widget.groupUsers) {
       if (participantSelected[user]!) {
         participation[user] = divideStrategy == 'by parts' ? partsCount[user]! : 1;
       }
     }
 
+    // Si la estrategia es por importe manual, se usa DivideByAmount con los valores editados
     if (divideStrategy == 'by amount') {
       final filteredManual = <String, double>{};
       for (var entry in manualEdited.entries) {
@@ -94,6 +102,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
     return strategy.calculateDivision(participation, total);
   }
 
+  // Construye la interfaz de la página
   @override
   Widget build(BuildContext context) {
     final formattedDate = DateFormat('dd/MM/yyyy').format(selectedDate);
@@ -108,6 +117,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
           key: _formKey,
           child: ListView(
             children: [
+              // Campo para introducir el título del gasto
               const Text("Título", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               TextFormField(
@@ -115,14 +125,17 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 decoration: const InputDecoration(labelText: "Introduce un título"),
                 validator: (value) => value!.isEmpty ? "Por favor introduce un título" : null,
               ),
+              // Campo para introducir el importe del gasto.
               const SizedBox(height: 16),
               const Text("Importe (€)", style: TextStyle(fontWeight: FontWeight.bold)),
               TextFormField(
                 controller: amountController,
                 decoration: const InputDecoration(labelText: "Importe"),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                // NO PERMITE NÚMEROS NEGATIVOS
                 inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
               ),
+              // Selector de comprador y fecha del gasto.
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -135,6 +148,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                     ),
                   ),
                   const SizedBox(width: 16),
+                  // Selector de la fecha del gasto.
                   Expanded(
                     child: InkWell(
                       onTap: _pickDate,
@@ -146,6 +160,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                   ),
                 ],
               ),
+              // Lista de participantes y sus importes correspondientes
               const SizedBox(height: 24),
               const Text("Participantes", style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
@@ -155,6 +170,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
 
                   return Row(
                     children: [
+                      // Checkbox para activar o desactivar al usuario.
                       Checkbox(
                         value: participantSelected[user],
                         onChanged: (val) {
@@ -168,6 +184,8 @@ class _AddExpensePageState extends State<AddExpensePage> {
                         },
                       ),
                       Expanded(child: Text(user)),
+
+                      // Interfaz para la estrategia by parts
                       if (divideStrategy == 'by parts') ...[
                         IconButton(
                           icon: const Icon(Icons.remove),
@@ -187,7 +205,9 @@ class _AddExpensePageState extends State<AddExpensePage> {
                           } : null,
                         ),
                         Text(" ${displayAmount.toStringAsFixed(2)} €"),
-                      ] else if (divideStrategy == 'by amount')
+                      ]
+                      // Interfaz para la estrategia by amount.
+                      else if (divideStrategy == 'by amount')
                         SizedBox(
                           width: 80,
                           child: TextFormField(
@@ -210,12 +230,14 @@ class _AddExpensePageState extends State<AddExpensePage> {
                             },
                           ),
                         )
+                      // Interfaz para la estrategia equally
                       else
                         Text("${displayAmount.toStringAsFixed(2)} €"),
                     ],
                   );
                 }).toList(),
               ),
+              // Selector de estrategia de división
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: divideStrategy,
@@ -227,8 +249,9 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 ],
                 onChanged: (value) => setState(() => divideStrategy = value!),
               ),
-              const SizedBox(height: 16),
 
+              // Checkbox para indicar si se trata de un reembolso
+              const SizedBox(height: 16),
               CheckboxListTile(
                 title: const Text("¿Es un reembolso?"),
                 value: isRefund,
@@ -239,8 +262,8 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 },
               ),
 
+              // Botón para recalcular y actualizar visualmente la pantalla
               const SizedBox(height: 16),
-
               ElevatedButton.icon(
                 onPressed: () {
                   setState(() {}); // Fuerza el recálculo y actualización visual
@@ -248,21 +271,22 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 icon: const Icon(Icons.refresh),
                 label: const Text("Actualizar información"),
               ),
+              // Botón para guardar el gasto.
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    if(isRefund){
-                      print("Hola mundo");
-                    }
-                    Navigator.of(context).pop(() async {await widget.group.addExpense(
-                      titleController.text,
-                      double.parse(amountController.text),
-                      selectedDate,
-                      selectedBuyer!,
-                      _calculateDivision(),
-                      null,
-                    );});
+                    Navigator.of(context).pop(() async {
+                      await widget.group.addExpense(
+                        titleController.text,
+                        double.parse(amountController.text),
+                        selectedDate,
+                        selectedBuyer!,
+                        _calculateDivision(),
+                        isRefund,
+                        null,
+                      );
+                    });
                   }
                 },
                 child: const Text("Añadir Gasto"),

@@ -6,6 +6,12 @@ import 'package:http/http.dart' as http;
 import '../services/token_service.dart';
 import 'user.dart';
 import 'expense.dart';
+import '../expenseFilters/FilterManager.dart';
+import '../expenseFilters/BadWordsFilter.dart';
+import '../expenseFilters/EmptyParticipantFilter.dart';
+import '../expenseFilters/ExpensiveWithPhotoFilter.dart';
+import '../expenseFilters/FutureDateFilter.dart';
+
 
 class Group {
   int? id;
@@ -262,7 +268,9 @@ class Group {
       });
       updateBalance(ex, ex.buyer);
       expenses.remove(ex);
-      totalExpense += ex.cost;
+      if (!ex.isRefund) {
+        totalExpense += ex.cost;
+      }
       updateGroupDB();
     }
     else{
@@ -274,13 +282,14 @@ class Group {
 
 
   Future<Expense> addExpense(
-     String title,
-     double cost,
-     DateTime date,
-     String buyer,
-     Map<String, double> participants,
-     String? photo,
-  ) async {
+      String title,
+      double cost,
+      DateTime date,
+      String buyer,
+      Map<String, double> participants,
+      bool isRefund,
+      String? photo,
+      ) async {
     final token = await TokenService().getToken();
     if (token == null) return Expense.fromJson({});
 
@@ -294,10 +303,35 @@ class Group {
       chosen = users.firstWhere((user) => user.username == buyer);
     }
 
+    // Aplicar los filtros antes de enviar al backend
+    final request = {
+      'title': title,
+      'cost': cost,
+      'date': date,
+      'buyer': buyer,
+      'participants': participants,
+      'image': photo,
+      'is_refund': isRefund,
+    };
+
+    final filterManager = FilterManager()
+      ..addFilter(BadWordsFilter())
+      ..addFilter(EmptyParticipantFilter())
+      ..addFilter(FutureDateFilter())
+      ..addFilter(ExpensiveWithPhotoFilter());
+
+    try {
+      filterManager.filterRequest(request);
+    } catch (e) {
+      throw Exception("Error de validación al añadir gasto: ${e.toString()}");
+    }
+
     final url = Uri.parse('$apiUrl/$id/expenses');
     final response = await http.post(url,
-        headers: {'Authorization': token,
-          'Content-Type': 'application/json'},
+        headers: {
+          'Authorization': token,
+          'Content-Type': 'application/json'
+        },
         body: jsonEncode({
           'expense': {
             'title': title,
@@ -305,7 +339,8 @@ class Group {
             'date': date.toIso8601String(),
             'buyer_id': chosen.id,
             'participants': participants,
-            'image': photo
+            'image': photo,
+            'is_refund': isRefund,
           }
         })
     );
@@ -313,13 +348,14 @@ class Group {
     final data = jsonDecode(response.body);
     if (response.statusCode == 201){
       Expense nuevo = Expense.fromJson(data);
-      totalExpense += nuevo.cost;
-      expenses.insert(0,nuevo);
+      if (!nuevo.isRefund) {
+        totalExpense += nuevo.cost;
+      }
+      expenses.insert(0, nuevo);
       updateBalance(nuevo, chosen);
       updateGroupDB();
       return nuevo;
-    }
-    else{
+    } else {
       final errors = data['errors'];
       throw Exception("Error al añadir gasto: $errors");
     }

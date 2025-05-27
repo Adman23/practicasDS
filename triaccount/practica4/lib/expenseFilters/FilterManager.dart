@@ -1,11 +1,14 @@
-class FilterManager {
-  final List<String> _errors = [];
+import 'FilterChain.dart';
+import 'Filter.dart';
 
-  void addError(String error) {
-    _errors.add(error);
+class FilterManager {
+  final FilterChain _filterChain = FilterChain();
+
+  void addFilter(Filter filter) {
+    _filterChain.addFilter(filter);
   }
 
-  bool hasErrors() => _errors.isNotEmpty;
-
-  List<String> getErrors() => _errors;
+  void filterRequest(Map<String, dynamic> request) {
+    _filterChain.execute(request); // Ejecuta todos los filtros en orden
+  }
 }
