@@ -10,8 +10,8 @@ class ExpenseDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Formatea la fecha en español
     final formattedDate = DateFormat("d 'de' MMMM 'de' y", 'es_ES').format(expense.date);
-    
 
     return Scaffold(
       appBar: AppBar(title: Text("")),
@@ -19,9 +19,9 @@ class ExpenseDetailPage extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            // Título centrado
+            // Título del gasto
             Text(
-              expense.title,
+              expense.title, // Nombre del gasto
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 26,
@@ -30,7 +30,7 @@ class ExpenseDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 6),
 
-            // Fecha centrada
+            // Fecha del gasto
             Text(
               formattedDate,
               textAlign: TextAlign.center,
@@ -42,7 +42,7 @@ class ExpenseDetailPage extends StatelessWidget {
 
             const SizedBox(height: 30),
 
-            // Card con quien pagó y cantidad en rojo
+            // Etiqueta Comprador
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -51,6 +51,8 @@ class ExpenseDetailPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
+
+            // Tarjeta que muestra el comprador y el coste del gasto
             Card(
               color: Colors.grey[900],
               shape: RoundedRectangleBorder(
@@ -60,11 +62,11 @@ class ExpenseDetailPage extends StatelessWidget {
               child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 title: Text(
-                  expense.buyer.username!,
+                  expense.buyer.username!, // Nombre del comprador
                   style: const TextStyle(fontSize: 20),
                 ),
                 trailing: Text(
-                  "${expense.cost.toStringAsFixed(2)} €",
+                  "${expense.cost.toStringAsFixed(2)} €", // Monto pagado
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -76,6 +78,7 @@ class ExpenseDetailPage extends StatelessWidget {
 
             const SizedBox(height: 30),
 
+            // Etiqueta Participantes
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -85,12 +88,12 @@ class ExpenseDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // Lista de participantes
+            // Lista de participantes que deben parte del gasto
             Expanded(
               child: ListView.builder(
-                itemCount: expense.participants.length,
+                itemCount: expense.participants.length, // Cantidad de participantes
                 itemBuilder: (context, index) {
-                  final p = expense.participants.keys.elementAt(index);
+                  final p = expense.participants.keys.elementAt(index); // Nombre del participante
                   return Card(
                     color: Colors.grey[900],
                     shape: RoundedRectangleBorder(
@@ -101,11 +104,11 @@ class ExpenseDetailPage extends StatelessWidget {
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       title: Text(
-                        p,
+                        p, // Nombre del participante
                         style: const TextStyle(fontSize: 20),
                       ),
                       trailing: Text(
-                        "${expense.participants[p]?.toStringAsFixed(2)} €",
+                        "${expense.participants[p]?.toStringAsFixed(2)} €", // Cantidad que debe
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 20,
