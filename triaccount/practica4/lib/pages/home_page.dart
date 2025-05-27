@@ -11,17 +11,15 @@ class HomePage extends StatefulWidget {
   final User loggedUser;
   const HomePage({super.key, required this.loggedUser});
 
-
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-
   final TriAccountService apiService = TriAccountService();
   static List<Group> userGroups = [];
 
-  // Al iniciar el widget, se obtienen los grupos del usuario.
+  // Se obtienen los grupos del usuario.
   @override
   void initState(){
     super.initState();
@@ -108,7 +106,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(height: 12),
-            // Lista expandible que muestra cada grupo en una tarjeta.
+            // Lista que muestra cada grupo en una tarjeta.
             Expanded(
               child: ListView.builder(
                 itemCount: userGroups.length,
@@ -128,7 +126,7 @@ class _HomePageState extends State<HomePage> {
                       // En el extremo derecho de cada grupo se muestra un botón para eliminarlo y un icono para navegar.
                       // Al pulsar el botón de eliminar, se muestra un cuadro de diálogo de confirmación.
                       // Si el usuario confirma, el grupo se elimina visualmente de la lista (solo en la interfaz),
-                      // luego se puede aplicar la lógica de eliminación real, y se muestra un mensaje de éxito.
+                      // luego se aplica la lógica de eliminación real, y se muestra un mensaje de éxito.
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [

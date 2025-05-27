@@ -12,20 +12,22 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
-
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
   final TriAccountService apiService = TriAccountService();
+
   bool isLoading = false;
   String? errorMessage;
 
   late User loggedUser;
 
+  // Constructor del estado: verifica si ya hay un usuario logueado
   _LoginPageState() {
     _checkLogin();
   }
 
+  // Verifica si el usuario ya está logueado (sesión guardada) y redirige al Home
   _checkLogin() async {
     User? user = await apiService.checkLogin();
     if (user != null){
@@ -37,6 +39,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  // Metodo que gestiona el proceso de login
   void _handleLogin() async {
     setState(() {
       isLoading = true;
@@ -44,27 +47,31 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
+      // Intenta iniciar sesión con las credenciales introducidas
       loggedUser = await apiService.login(
         emailController.text.trim(),
         passwordController.text,
       );
 
-      // Si el login es exitoso, redirige al home
+      // Si el login es exitoso, redirige al HomePage
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomePage(loggedUser: loggedUser)),
       );
     } catch (e) {
+      // Si hay un error, lo muestra en pantalla
       setState(() {
         errorMessage = e.toString();
       });
     } finally {
+      // Desactiva el estado de carga al finalizar
       setState(() {
         isLoading = false;
       });
     }
   }
 
+  // Construye la interfaz de usuario
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,6 +92,8 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: 24),
+
+            // Campo de texto para el email
             TextField(
               controller: emailController,
               decoration: const InputDecoration(
@@ -94,6 +103,8 @@ class _LoginPageState extends State<LoginPage> {
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 16),
+
+            // Campo de texto para la contraseña (oculta el texto)
             TextField(
               controller: passwordController,
               decoration: const InputDecoration(
@@ -103,26 +114,32 @@ class _LoginPageState extends State<LoginPage> {
               obscureText: true,
             ),
             const SizedBox(height: 24),
+
+            // Muestra el mensaje de error si existe
             if (errorMessage != null)
               Text(
                 errorMessage!,
                 style: const TextStyle(color: Colors.red),
                 textAlign: TextAlign.center,
               ),
+
+            // Botón de inicio de sesión
             ElevatedButton(
-              onPressed: isLoading ? null : _handleLogin,
+              onPressed: isLoading ? null : _handleLogin, // Desactivado si está cargando
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey[900],
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
               child: isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
+                  ? const CircularProgressIndicator(color: Colors.white) // Indicador de carga
                   : const Text(
                 'Iniciar Sesión',
                 style: TextStyle(fontSize: 16),
               ),
             ),
             const SizedBox(height: 20),
+
+            // Enlace para ir a la página de registro
             Center(
               child: GestureDetector(
                 onTap: () {

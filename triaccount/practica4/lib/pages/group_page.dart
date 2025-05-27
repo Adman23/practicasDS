@@ -5,10 +5,11 @@ import '../services/triaccount_api_service.dart';
 import 'expense_detail_page.dart';
 import 'add_expense_page.dart';
 
+// Página de grupo que permite gestionar los gastos, saldos y miembros
 class GroupPage extends StatefulWidget {
   final Group group;
 
- const GroupPage({super.key, required this.group});
+  const GroupPage({super.key, required this.group});
 
   @override
   State<GroupPage> createState() => _GroupPageState();
@@ -16,13 +17,13 @@ class GroupPage extends StatefulWidget {
 
 class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMixin {
 
-
-  // Todos los usuarios registrados en el sistema, cargados desde la API
+  // Lista de todos los usuarios del sistema
   List<User> allUsers = [];
 
-  // Para controlar la selección en el dropdown de añadir usuarios
+  // Conjunto de usuarios seleccionados para añadir al grupo
   Set<User> selectedUsersToAdd = {};
 
+  // Control de carga y guardado
   bool isLoadingUsers = false;
   bool isSavingChanges = false;
 
@@ -33,13 +34,15 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
   void initState() {
     super.initState();
     _group = widget.group;
-    _loadAllUsers();
+    _loadAllUsers(); // Carga inicial de usuarios del sistema
   }
 
-  Future<void> _removeUser(String username) async  {
+  // Elimina un usuario del grupo
+  Future<void> _removeUser(String username) async {
     await _group.removeUser(username);
   }
 
+  // Carga todos los usuarios del sistema desde la API
   Future<void> _loadAllUsers() async {
     setState(() {
       isLoadingUsers = true;
@@ -58,23 +61,21 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
     }
   }
 
-
+  // Abre un diálogo para seleccionar usuarios que aún no están en el grupo
   void _openAddUsersDropdown() {
     showDialog(
       context: context,
       builder: (context) {
-        // Usuarios que no están aún en el grupo
-        final List<User> usersNotInGroup = allUsers.where((u) => !_group.users.any((gu) => gu.id == u.id)).toList();
+        final List<User> usersNotInGroup = allUsers.where(
+              (u) => !_group.users.any((gu) => gu.id == u.id),
+        ).toList();
 
         return StatefulBuilder(
           builder: (context, setStateDialog) {
             return AlertDialog(
               title: const Text('Añadir usuarios'),
               content: isLoadingUsers
-                  ? SizedBox(
-                height: 80,
-                child: Center(child: CircularProgressIndicator()),
-              )
+                  ? const SizedBox(height: 80, child: Center(child: CircularProgressIndicator()))
                   : SizedBox(
                 width: double.maxFinite,
                 child: usersNotInGroup.isEmpty
@@ -88,11 +89,9 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                       value: isSelected,
                       onChanged: (checked) {
                         setStateDialog(() {
-                          if (checked == true) {
-                            selectedUsersToAdd.add(user);
-                          } else {
-                            selectedUsersToAdd.remove(user);
-                          }
+                          checked == true
+                              ? selectedUsersToAdd.add(user)
+                              : selectedUsersToAdd.remove(user);
                         });
                       },
                     );
@@ -108,8 +107,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                   child: const Text('Cancelar'),
                 ),
                 ElevatedButton(
-                  onPressed: selectedUsersToAdd.isEmpty? null : () async {
-                    // Añadir usuarios seleccionados al grupo con amount 0
+                  onPressed: selectedUsersToAdd.isEmpty ? null : () async {
                     for (var user in selectedUsersToAdd) {
                       await _group.inviteUser(user.email);
                     }
@@ -127,19 +125,11 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
     );
   }
 
+  // Guarda cambios (placeholder, ya que el grupo se guarda en tiempo real)
   Future<void> _saveChanges() async {
-    setState(() {
-      isSavingChanges = true;
-    });
-
+    setState(() => isSavingChanges = true);
     try {
-      // Aquí se haría un botón de refresh para obtener cambios de la bd que
-      // puede que no hubiera, en teoría no es necesario guardar nada
-      // porque se va guardando sobre la marcha
-
-      // Simulamos espera
-      await Future.delayed(const Duration(seconds: 1));
-
+      await Future.delayed(const Duration(seconds: 1)); // Simula proceso
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cambios guardados correctamente')),
       );
@@ -148,29 +138,27 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
         SnackBar(content: Text('Error guardando cambios: $e')),
       );
     } finally {
-      setState(() {
-        isSavingChanges = false;
-      });
+      setState(() => isSavingChanges = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 3, // Tres pestañas: Gastos, Saldos, Usuarios
       child: Scaffold(
         appBar: AppBar(
           title: Text('${_group.groupName} Details'),
           actions: [
             IconButton(
-              icon: Icon(Icons.refresh),
-              onPressed: () async {
-                // Lógica para recargar los datos
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                // Aquí se puede recargar desde la API si fuera necesario
               },
             ),
           ],
-          bottom: TabBar(
-            tabs: const [
+          bottom: const TabBar(
+            tabs: [
               Tab(text: 'Gastos'),
               Tab(text: 'Saldos'),
               Tab(text: 'Usuarios'),
@@ -179,6 +167,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
         ),
         body: Column(
           children: [
+            // Barra con el gasto total del grupo
             Container(
               width: double.infinity,
               color: Colors.teal[800],
@@ -194,17 +183,20 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                 ),
               ),
             ),
+
+            // Contenido de las pestañas
             Expanded(
               child: TabBarView(
                 children: [
-                  // TAB 1 - GASTOS con botón centrado horizontalmente abajo
+
+                  // ---------------- TAB 1: GASTOS ---------------- //
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Stack(
                       children: [
-                        // Lista principal de gastos
+                        // Lista de gastos
                         ListView.builder(
-                          padding: const EdgeInsets.only(bottom: 80), // Espacio para el botón
+                          padding: const EdgeInsets.only(bottom: 80),
                           itemCount: _group.expenses.length,
                           itemBuilder: (context, index) {
                             final entry = _group.expenses[index];
@@ -222,11 +214,11 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                   child: ListTile(
                                     contentPadding:
                                     const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                    title: Text(
-                                      entry.title,
-                                      style: const TextStyle(
-                                          fontSize: 18, fontWeight: FontWeight.w500),
-                                    ),
+                                    title: Text(entry.title,
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w500,
+                                        )),
                                     subtitle: Text("Pagado por: ${entry.buyer.username}"),
                                     trailing: Row(
                                       mainAxisSize: MainAxisSize.min,
@@ -242,23 +234,23 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                         IconButton(
                                           icon: const Icon(Icons.delete, color: Colors.redAccent),
                                           onPressed: () {
+                                            // Confirmar antes de eliminar gasto
                                             showDialog(
                                               context: context,
                                               builder: (context) => AlertDialog(
                                                 title: const Text('Eliminar gasto'),
-                                                content: const Text('¿Estás seguro de que deseas eliminar este gasto?'),
+                                                content: const Text(
+                                                    '¿Estás seguro de que deseas eliminar este gasto?'),
                                                 actions: [
                                                   TextButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                    },
+                                                    onPressed: () => Navigator.pop(context),
                                                     child: const Text('Cancelar'),
-                                                    ),
+                                                  ),
                                                   TextButton(
                                                     onPressed: () async {
                                                       await _group.removeExpense(entry);
                                                       setState(() {});
-                                                      Navigator.pop(context); // Por ahora, solo cerramos el diálogo
+                                                      Navigator.pop(context);
                                                     },
                                                     child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
                                                   ),
@@ -269,7 +261,8 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                         ),
                                       ],
                                     ),
-                                    onTap: () async {
+                                    onTap: () {
+                                      // Ver detalles del gasto
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -284,7 +277,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                           },
                         ),
 
-                        // Botón flotante abajo en pantalla
+                        // Botón para añadir nuevo gasto
                         Positioned(
                           bottom: 16,
                           left: 0,
@@ -295,7 +288,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                 final addEx = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => AddExpensePage(
+                                    builder: (_) => AddExpensePage(
                                       group: _group,
                                       groupUsers: _group.balances.keys.toList(),
                                     ),
@@ -309,7 +302,6 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                     SnackBar(
                                       content: Text(e.toString().replaceFirst('ERROR: ', '')),
                                       backgroundColor: Colors.red,
-                                      duration: const Duration(seconds: 3),
                                     ),
                                   );
                                 }
@@ -324,26 +316,24 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                     ),
                   ),
 
-                  // TAB 2 - SALDOS
+                  // ---------------- TAB 2: SALDOS ---------------- //
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
                     child: ListView.builder(
-                      itemCount: _group.balances.keys.length,
+                      itemCount: _group.balances.length,
                       itemBuilder: (context, index) {
                         final person = _group.balances.keys.elementAt(index);
                         final double amount = _group.balances[person] ?? 0.0;
 
                         final bool isPositive = amount > 0;
                         final bool isNegative = amount < 0;
-
-                        // Color según el valor del saldo
+                        // El color de los balances cambia dependiendo de si están en números negativos (rojo), positivos(verde) o neutros (grís)
                         final Color balanceColor = isPositive
                             ? Colors.green
                             : isNegative
                             ? Colors.red
                             : Colors.grey;
 
-                        // Refunds del usuario si existen
                         final refundsMap = _group.refunds[person] ?? {};
                         bool showRefunds = false;
 
@@ -353,34 +343,37 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Card(
+                                  // Lista de balances de cada usuario
                                   color: Colors.grey[900],
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                   margin: const EdgeInsets.symmetric(vertical: 8),
-                                  elevation: 3,
                                   child: ListTile(
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                    title: Text(
-                                      person,
-                                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                                    ),
+                                    // Nombre de la persona
+                                    title: Text(person),
                                     trailing: Text(
+                                      // Balance de la persona
                                       "${amount >= 0 ? '+' : '-'}${amount.abs().toStringAsFixed(2)} €",
                                       style: TextStyle(
+                                        color: balanceColor,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 16,
-                                        color: balanceColor,
                                       ),
                                     ),
                                   ),
                                 ),
-
-                                // Botón para mostrar/ocultar devoluciones
+                                // Si hay devoluciones, se muestra el botón para verlas
                                 if (refundsMap.isNotEmpty)
                                   Padding(
                                     padding: const EdgeInsets.only(left: 12.0),
                                     child: TextButton.icon(
-                                      icon: Icon(showRefunds ? Icons.expand_less : Icons.expand_more),
-                                      label: Text(showRefunds ? 'Ocultar devoluciones' : 'Mostrar devoluciones'),
+                                      icon: Icon(showRefunds
+                                          ? Icons.expand_less
+                                          : Icons.expand_more),
+                                      label: Text(showRefunds
+                                          ? 'Ocultar devoluciones'
+                                          : 'Mostrar devoluciones'),
                                       onPressed: () {
                                         setStateRefunds(() {
                                           showRefunds = !showRefunds;
@@ -388,12 +381,11 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                       },
                                     ),
                                   ),
-
-                                // Detalle de devoluciones
                                 if (showRefunds && refundsMap.isNotEmpty)
                                   Padding(
                                     padding: const EdgeInsets.only(left: 32.0, bottom: 12.0),
                                     child: Column(
+                                      // Contenido que muestra todos los usuarios a los que le debe dinero (y cuanto)
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: refundsMap.entries.map((entry) {
                                         return Text(
@@ -411,16 +403,14 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                     ),
                   ),
 
-                  // TAB 3 - CONFIGURACIÓN
+                  // ---------------- TAB 3: USUARIOS ---------------- //
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          "Miembros del grupo:",
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
+                        const Text("Miembros del grupo:",
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 12),
                         Expanded(
                           child: ListView.builder(
@@ -428,6 +418,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                             itemBuilder: (context, index) {
                               final user = _group.balances.keys.elementAt(index);
                               return Card(
+                                // Lista de los usuarios que están añadidos al grupo
                                 margin: const EdgeInsets.symmetric(vertical: 6),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12)),
@@ -435,16 +426,16 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                 child: ListTile(
                                   title: Text(user),
                                   trailing: IconButton(
+                                    // Boton para eliminar usuarios
                                     icon: const Icon(Icons.delete, color: Colors.redAccent),
                                     onPressed: () async {
-                                      bool canRemove = _group.balances[user] == 0;
-                                      if (!canRemove) {
+                                      // Solo se puede eliminar si el balance está en 0
+                                      if (_group.balances[user] != 0) {
                                         showDialog(
                                           context: context,
-                                          builder: (context) => AlertDialog(
+                                          builder: (_) => AlertDialog(
                                             title: const Text('No se puede eliminar'),
-                                            content: Text(
-                                                '$user no puede eliminarse porque tiene gastos pendientes.'),
+                                            content: Text('$user no puede eliminarse porque tiene gastos pendientes.'),
                                             actions: [
                                               TextButton(
                                                 onPressed: () => Navigator.pop(context),
@@ -466,6 +457,7 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                         ),
                         const SizedBox(height: 12),
                         ElevatedButton.icon(
+                          // Botón para añadir usuarios
                           onPressed: _openAddUsersDropdown,
                           icon: const Icon(Icons.person_add),
                           label: const Text('Añadir usuarios'),
@@ -474,12 +466,16 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
+                            // Botón para guardar cambios
                             onPressed: isSavingChanges ? null : _saveChanges,
                             child: isSavingChanges
                                 ? const SizedBox(
                               height: 20,
                               width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
                             )
                                 : const Text('Guardar cambios'),
                           ),
