@@ -1,12 +1,11 @@
 import 'Filter.dart';
-import '../models/expense.dart';
-import 'FilterManager.dart';
 
 class FutureDateFilter implements Filter {
   @override
-  void execute(Expense expense, FilterManager manager) {
-    if (expense.date.isAfter(DateTime.now())) {
-      manager.addError('La fecha del gasto no puede estar en el futuro.');
+  void execute(Map<String, dynamic> request) {
+    final date = request['date'] as DateTime?;
+    if (date != null && date.isAfter(DateTime.now())) {
+      throw Exception("No se pueden registrar gastos con fecha futura.");
     }
   }
 }
