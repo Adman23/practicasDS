@@ -8,8 +8,11 @@ import '../moneyDivisorModule/DivideByParts.dart';
 import '../moneyDivisorModule/DivideEqually.dart';
 import '../moneyDivisorModule/DivideByAmount.dart';
 
+// Página que permite al usuario añadir un nuevo gasto dentro de un grupo
 class AddExpensePage extends StatefulWidget {
+  // Grupo al que se añadirá el gasto.
   final Group group;
+  // Lista de usuarios del grupo.
   final List<String> groupUsers;
 
   AddExpensePage({required this.group, required this.groupUsers});
@@ -24,28 +27,30 @@ class _AddExpensePageState extends State<AddExpensePage> {
   final amountController = TextEditingController();
   String? selectedBuyer;
   DateTime selectedDate = DateTime.now();
-  Map<String, bool> participantSelected = {};
+  Map<String, bool> participantSelected = {}; // Diccionario que indica si cada usuario está participando en el gasto
   String divideStrategy = 'equally';
-  Map<String, int> partsCount = {};
-  Map<String, double> manualAmounts = {};
-  Map<String, bool> manualEdited = {};
+  Map<String, int> partsCount = {}; // Número de partes por usuario (para estrategia "por partes")
+  Map<String, double> manualAmounts = {}; // Cantidades asignadas manualmente (estrategia by amount)
+  Map<String, bool> manualEdited = {}; // Indica si el usuario modificó manualmente su cantidad. (los campos modificados no se actualizan)
   late DivideStrategy strategy;
+  bool isRefund = false; // Marca si el gasto es un reembolso
 
-  bool isRefund = false;
   @override
   void initState() {
     super.initState();
 
+    // Inicializa datos por usuario: todos están seleccionados y con valores por defecto
     for (var user in widget.groupUsers) {
       participantSelected[user] = true;
       partsCount[user] = 1;
       manualAmounts[user] = 0.0;
       manualEdited[user] = false;
     }
-    selectedBuyer = widget.groupUsers.first;
+    selectedBuyer = widget.groupUsers.first; // El comprador por defecto es el primero
     strategy = DivideEqually();
   }
 
+  // Abre el selector de fecha y actualiza la fecha elegida
   void _pickDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -58,6 +63,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
     }
   }
 
+  // Actualiza la estrategia seleccionada
   void _updateStrategy(String strategyName) {
     switch (strategyName) {
       case 'by parts':
@@ -71,16 +77,18 @@ class _AddExpensePageState extends State<AddExpensePage> {
     }
   }
 
+  // Calcula la división del gasto de entre los participantes segun la estrategia seleccionada
   Map<String, double> _calculateDivision() {
     final total = double.tryParse(amountController.text) ?? 0.0;
+    // Construye el mapa de participación (usuarios activos y sus partes o 1)
     final participation = <String, int>{};
-
     for (var user in widget.groupUsers) {
       if (participantSelected[user]!) {
         participation[user] = divideStrategy == 'by parts' ? partsCount[user]! : 1;
       }
     }
 
+    // Si la estrategia es por importe manual, se usa DivideByAmount con los valores editados
     if (divideStrategy == 'by amount') {
       final filteredManual = <String, double>{};
       for (var entry in manualEdited.entries) {
@@ -94,6 +102,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
     return strategy.calculateDivision(participation, total);
   }
 
+  // Construye la interfaz de la página
   @override
   Widget build(BuildContext context) {
     final formattedDate = DateFormat('dd/MM/yyyy').format(selectedDate);
