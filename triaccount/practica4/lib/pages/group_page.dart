@@ -171,9 +171,9 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
           ],
           bottom: TabBar(
             tabs: const [
-              Tab(text: 'Resumen'),
-              Tab(text: 'Gastos'),
-              Tab(text: 'Usuarios'),
+              Tab(text: 'Gestos'),
+              Tab(text: 'Saldos'),
+              Tab(text: 'Configuración'),
             ],
           ),
         ),
@@ -320,32 +320,81 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                       itemCount: _group.balances.keys.length,
                       itemBuilder: (context, index) {
                         final person = _group.balances.keys.elementAt(index);
-                        final double? amount = _group.balances[person];
-                        final bool isPositive = amount! >= 0;
+                        final double amount = _group.balances[person] ?? 0.0;
 
-                        return Card(
-                          color: Colors.grey[900],
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          elevation: 3,
-                          child: ListTile(
-                            contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                            title: Text(
-                              person,
-                              style:
-                              const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                            ),
-                            trailing: Text(
-                              "${isPositive ? '+' : '-'}${amount.abs().toStringAsFixed(2)} €",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: isPositive ? Colors.green : Colors.red,
-                              ),
-                            ),
-                          ),
+                        final bool isPositive = amount > 0;
+                        final bool isNegative = amount < 0;
+
+                        // Color según el valor del saldo
+                        final Color balanceColor = isPositive
+                            ? Colors.green
+                            : isNegative
+                            ? Colors.red
+                            : Colors.grey;
+
+                        // Refunds del usuario si existen
+                        final refundsMap = _group.refunds[person] ?? {};
+                        bool showRefunds = false;
+
+                        return StatefulBuilder(
+                          builder: (context, setStateRefunds) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Card(
+                                  color: Colors.grey[900],
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  margin: const EdgeInsets.symmetric(vertical: 8),
+                                  elevation: 3,
+                                  child: ListTile(
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                    title: Text(
+                                      person,
+                                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                                    ),
+                                    trailing: Text(
+                                      "${amount >= 0 ? '+' : '-'}${amount.abs().toStringAsFixed(2)} €",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: balanceColor,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                // Botón para mostrar/ocultar devoluciones
+                                if (refundsMap.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 12.0),
+                                    child: TextButton.icon(
+                                      icon: Icon(showRefunds ? Icons.expand_less : Icons.expand_more),
+                                      label: Text(showRefunds ? 'Ocultar devoluciones' : 'Mostrar devoluciones'),
+                                      onPressed: () {
+                                        setStateRefunds(() {
+                                          showRefunds = !showRefunds;
+                                        });
+                                      },
+                                    ),
+                                  ),
+
+                                // Detalle de devoluciones
+                                if (showRefunds && refundsMap.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 32.0, bottom: 12.0),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: refundsMap.entries.map((entry) {
+                                        return Text(
+                                          '→ Debe a ${entry.key}: ${entry.value.toStringAsFixed(2)} €',
+                                          style: const TextStyle(fontSize: 14, color: Colors.white70),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                              ],
+                            );
+                          },
                         );
                       },
                     ),
