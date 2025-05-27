@@ -250,19 +250,30 @@ class _AddExpensePageState extends State<AddExpensePage> {
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    if(isRefund){
+                    if (isRefund) {
                       print("Hola mundo");
                     }
-                    Navigator.of(context).pop(() async {await widget.group.addExpense(
-                      titleController.text,
-                      double.parse(amountController.text),
-                      selectedDate,
-                      selectedBuyer!,
-                      _calculateDivision(),
-                      null,
-                    );});
+                    try {
+                      await widget.group.addExpense(
+                        titleController.text,
+                        double.parse(amountController.text),
+                        selectedDate,
+                        selectedBuyer!,
+                        _calculateDivision(),
+                        null,
+                      );
+                      Navigator.of(context).pop();
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(e.toString().replaceFirst('ERROR: ', '')),
+                          backgroundColor: Colors.red,
+                          duration: const Duration(seconds: 3),
+                        ),
+                      );
+                    }
                   }
                 },
                 child: const Text("Añadir Gasto"),
