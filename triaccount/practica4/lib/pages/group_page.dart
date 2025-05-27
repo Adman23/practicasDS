@@ -301,8 +301,18 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                     ),
                                   ),
                                 );
-                                await addEx();
-                                setState(() {});
+                                try {
+                                  await addEx();
+                                  setState(() {});
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(e.toString().replaceFirst('ERROR: ', '')),
+                                      backgroundColor: Colors.red,
+                                      duration: const Duration(seconds: 3),
+                                    ),
+                                  );
+                                }
                               },
                               backgroundColor: Colors.grey[900],
                               child: const Icon(Icons.add, size: 32),
