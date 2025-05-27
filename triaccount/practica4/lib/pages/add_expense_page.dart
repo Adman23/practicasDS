@@ -31,9 +31,11 @@ class _AddExpensePageState extends State<AddExpensePage> {
   Map<String, bool> manualEdited = {};
   late DivideStrategy strategy;
 
+  bool isRefund = false;
   @override
   void initState() {
     super.initState();
+
     for (var user in widget.groupUsers) {
       participantSelected[user] = true;
       partsCount[user] = 1;
@@ -226,6 +228,19 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 onChanged: (value) => setState(() => divideStrategy = value!),
               ),
               const SizedBox(height: 16),
+
+              CheckboxListTile(
+                title: const Text("¿Es un reembolso?"),
+                value: isRefund,
+                onChanged: (val) {
+                  setState(() {
+                    isRefund = val!;
+                  });
+                },
+              ),
+
+              const SizedBox(height: 16),
+
               ElevatedButton.icon(
                 onPressed: () {
                   setState(() {}); // Fuerza el recálculo y actualización visual
@@ -237,6 +252,9 @@ class _AddExpensePageState extends State<AddExpensePage> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
+                    if(isRefund){
+                      print("Hola mundo");
+                    }
                     Navigator.of(context).pop(() async {await widget.group.addExpense(
                       titleController.text,
                       double.parse(amountController.text),
