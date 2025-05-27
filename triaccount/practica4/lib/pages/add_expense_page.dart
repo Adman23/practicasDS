@@ -117,6 +117,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
           key: _formKey,
           child: ListView(
             children: [
+              // Campo para introducir el título del gasto
               const Text("Título", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               TextFormField(
@@ -124,14 +125,17 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 decoration: const InputDecoration(labelText: "Introduce un título"),
                 validator: (value) => value!.isEmpty ? "Por favor introduce un título" : null,
               ),
+              // Campo para introducir el importe del gasto.
               const SizedBox(height: 16),
               const Text("Importe (€)", style: TextStyle(fontWeight: FontWeight.bold)),
               TextFormField(
                 controller: amountController,
                 decoration: const InputDecoration(labelText: "Importe"),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                // NO PERMITE NÚMEROS NEGATIVOS
                 inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
               ),
+              // Selector de comprador y fecha del gasto.
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -144,6 +148,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                     ),
                   ),
                   const SizedBox(width: 16),
+                  // Selector de la fecha del gasto.
                   Expanded(
                     child: InkWell(
                       onTap: _pickDate,
@@ -155,6 +160,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                   ),
                 ],
               ),
+              // Lista de participantes y sus importes correspondientes
               const SizedBox(height: 24),
               const Text("Participantes", style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
@@ -164,6 +170,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
 
                   return Row(
                     children: [
+                      // Checkbox para activar o desactivar al usuario.
                       Checkbox(
                         value: participantSelected[user],
                         onChanged: (val) {
@@ -177,6 +184,8 @@ class _AddExpensePageState extends State<AddExpensePage> {
                         },
                       ),
                       Expanded(child: Text(user)),
+
+                      // Interfaz para la estrategia by parts
                       if (divideStrategy == 'by parts') ...[
                         IconButton(
                           icon: const Icon(Icons.remove),
@@ -196,7 +205,9 @@ class _AddExpensePageState extends State<AddExpensePage> {
                           } : null,
                         ),
                         Text(" ${displayAmount.toStringAsFixed(2)} €"),
-                      ] else if (divideStrategy == 'by amount')
+                      ]
+                      // Interfaz para la estrategia by amount.
+                      else if (divideStrategy == 'by amount')
                         SizedBox(
                           width: 80,
                           child: TextFormField(
@@ -219,12 +230,14 @@ class _AddExpensePageState extends State<AddExpensePage> {
                             },
                           ),
                         )
+                      // Interfaz para la estrategia equally
                       else
                         Text("${displayAmount.toStringAsFixed(2)} €"),
                     ],
                   );
                 }).toList(),
               ),
+              // Selector de estrategia de división
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: divideStrategy,
@@ -236,8 +249,9 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 ],
                 onChanged: (value) => setState(() => divideStrategy = value!),
               ),
-              const SizedBox(height: 16),
 
+              // Checkbox para indicar si se trata de un reembolso
+              const SizedBox(height: 16),
               CheckboxListTile(
                 title: const Text("¿Es un reembolso?"),
                 value: isRefund,
@@ -248,8 +262,8 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 },
               ),
 
+              // Botón para recalcular y actualizar visualmente la pantalla
               const SizedBox(height: 16),
-
               ElevatedButton.icon(
                 onPressed: () {
                   setState(() {}); // Fuerza el recálculo y actualización visual
@@ -257,6 +271,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 icon: const Icon(Icons.refresh),
                 label: const Text("Actualizar información"),
               ),
+              // Botón para guardar el gasto.
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
