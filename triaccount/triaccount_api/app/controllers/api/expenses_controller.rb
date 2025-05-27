@@ -43,12 +43,12 @@ class Api::ExpensesController < ApplicationController
         end
     end
 
-    # DELETE /groups/id/expenses/id_ex
+    # DELETE /groups/group_id/expenses/id_ex
     def destroy
         if @expense.destroy
-            head :ok
+            head :no_content
         else
-            render json: { error: "No se pudo eliminar el gasto" }, status: :unprocessable_entity
+            render json: { errors: @expense.errors }, status: :unprocessable_entity
         end
     end
 

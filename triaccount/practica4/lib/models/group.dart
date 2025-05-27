@@ -232,16 +232,44 @@ class Group {
           'group': {
             'balances': balances,
             'refunds': refunds,
+            'total_expense': totalExpense,
           }
         }));
 
     if (response.statusCode == 204){
-      print("ACTUALIZADO");
+      // BIEN
     }
     else{
       final data = jsonDecode(response.body);
       final errors = data['errors'];
       throw Exception("Error al modificar el grupo : $errors");
+    }
+  }
+
+
+  Future<void> removeExpense(Expense ex) async{
+    final token = await TokenService().getToken();
+    if (token == null) return;
+
+    final url = Uri.parse('$apiUrl/$id/expenses/${ex.id}');
+    final response = await http.delete(url,
+        headers: {'Authorization': token,
+        'Content-Type': 'application/json'});
+
+    if (response.statusCode == 204){
+      ex.cost = -ex.cost;
+      ex.participants.forEach((key,value) {
+        ex.participants[key] = -value;
+      });
+      updateBalance(ex, ex.buyer);
+      expenses.remove(ex);
+      totalExpense += ex.cost;
+      updateGroupDB();
+    }
+    else{
+      final data = jsonDecode(response.body);
+      final errors = data['errors'];
+      throw Exception("No se ha podido eliminar el gasto: $errors");
     }
   }
 
@@ -287,7 +315,7 @@ class Group {
     if (response.statusCode == 201){
       Expense nuevo = Expense.fromJson(data);
       totalExpense += nuevo.cost;
-      expenses.add(nuevo);
+      expenses.insert(0,nuevo);
       updateBalance(nuevo, chosen);
       updateGroupDB();
       return nuevo;

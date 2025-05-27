@@ -35,13 +35,15 @@ class Expense {
     );
   }
 
-  /*
+
   @override
   bool operator == (Object other) =>
       identical(this, other) || // Compara en memoria
           (other is Expense &&
           runtimeType == other.runtimeType &&
-          id == other.id && title == other.title);
+          id == other.id);
 
-  */
+  @override
+  int get hashCode => Object.hash(id,title);
+
 }

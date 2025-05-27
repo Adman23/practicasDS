@@ -249,14 +249,15 @@ class _GroupPageState extends State<GroupPage> with SingleTickerProviderStateMix
                                                 content: const Text('¿Estás seguro de que deseas eliminar este gasto?'),
                                                 actions: [
                                                   TextButton(
-                                                    onPressed: () => {
-                                                      Navigator.pop(context)
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
                                                     },
                                                     child: const Text('Cancelar'),
                                                     ),
                                                   TextButton(
-                                                    onPressed: () {
-                                                      // Aquí se podría ejecutar la lógica para eliminar el gasto
+                                                    onPressed: () async {
+                                                      await _group.removeExpense(entry);
+                                                      setState(() {});
                                                       Navigator.pop(context); // Por ahora, solo cerramos el diálogo
                                                     },
                                                     child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
