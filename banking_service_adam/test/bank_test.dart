@@ -1,11 +1,11 @@
 
 import  'package:banking_service_adam/Account.dart';
-import  'package:banking_service_adam/Transaction.dart';
-import  'package:banking_service_adam/DepositTransaction.dart';
-import  'package:banking_service_adam/WithdrawalTransaction.dart';
-import  'package:banking_service_adam/TransferTransaction.dart';
+import  'package:banking_service_adam/transactions/Transaction.dart';
+import  'package:banking_service_adam/transactions/DepositTransaction.dart';
+import  'package:banking_service_adam/transactions/WithdrawalTransaction.dart';
+import  'package:banking_service_adam/transactions/TransferTransaction.dart';
 import  'package:banking_service_adam/BankService.dart';
-import  'package:banking_service_adam/DepositTransaction.dart';
+import  'package:banking_service_adam/transactions/DepositTransaction.dart';
 import  'package:test/test.dart';
 
 void main(){

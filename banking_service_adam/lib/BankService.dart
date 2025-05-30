@@ -1,7 +1,7 @@
-import './Transaction.dart';
-import './WithdrawalTransaction.dart';
-import './DepositTransaction.dart';
-import './TransferTransaction.dart';
+import 'transactions/Transaction.dart';
+import 'transactions/WithdrawalTransaction.dart';
+import 'transactions/DepositTransaction.dart';
+import 'transactions/TransferTransaction.dart';
 import './Account.dart';
 
 

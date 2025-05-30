@@ -1,5 +1,5 @@
-import './Transaction.dart';
-import './Account.dart';
+import 'Transaction.dart';
+import '../Account.dart';
 
 class WithdrawalTransaction extends Transaction {
 

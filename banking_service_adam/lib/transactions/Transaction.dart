@@ -1,4 +1,4 @@
-import './Account.dart';
+import '../Account.dart';
 
 
 abstract class Transaction {

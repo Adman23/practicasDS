@@ -1,5 +1,3 @@
-
-
 class Account {
   String number = "";
   double balance = 0;
