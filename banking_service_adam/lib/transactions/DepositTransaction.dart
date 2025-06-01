@@ -6,8 +6,12 @@ class DepositTransaction extends Transaction {
   DepositTransaction({required super.amount});
 
   @override
-  void apply(Account account){
+  Future<void> apply(Account account) async {
     try{
+      final body = {
+        "amount": amount,
+      };
+      await super.operate("deposit", body, account.id);
       account.deposit(super.amount);
     }
     catch(e){

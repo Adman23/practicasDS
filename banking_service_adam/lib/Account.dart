@@ -1,18 +1,27 @@
 class Account {
-  String number = "";
-  double balance = 0;
+  int id;
+  String number;
+  double balance;
 
   /*
     Balance inicial será 0 por definición y necesitará un número de cuenta
    */
-  Account({required this.number});
+  Account({required this.number, required this.id, required this.balance});
+
+  factory Account.fromJson(Map<String, dynamic> json){
+    return Account(
+      id: json['id']!,
+      number: json['number']!,
+      balance: double.parse(json['balance'])
+    );
+  }
 
   /*
     Función para hacer un depósito de dinero
    */
   void deposit(double value){
     if (value > 0){
-      balance += value; // Modificamos la cuenta
+      balance +=  value; // Modificamos la cuenta
     }
     else {
       throw RangeError("Valor no está en el rango ( > 0 )");
@@ -37,3 +46,4 @@ class Account {
     }
   }
 }
+

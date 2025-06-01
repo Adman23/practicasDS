@@ -7,8 +7,14 @@ class TransferTransaction extends Transaction {
   TransferTransaction({required super.amount, required this.toAccount});
 
   @override
-  void apply(Account fromAccount){
+  Future<void> apply(Account fromAccount) async {
     try{
+      final body = {
+        "amount": amount,
+        "to_account_id": toAccount.id,
+      };
+      await super.operate("transfer", body, fromAccount.id);
+
       fromAccount.withdrawal(super.amount);
       toAccount.deposit(super.amount);
     }

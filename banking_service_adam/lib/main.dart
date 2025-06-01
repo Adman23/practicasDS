@@ -1,31 +1,33 @@
 import 'package:flutter/material.dart';
 import 'BankService.dart';
+import 'login_page.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
+// Widget principal de la aplicación
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-        home: const BankWidget(title: 'Bienvenido usuario: Pepe'),
+      title: 'Banking Service',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark(),
+      home: const LoginPage(),
     );
   }
 }
 
 
+// Widget que funciona como HOME es llamado por login cuando se autentica
 class BankWidget extends StatefulWidget {
-  const BankWidget({super.key, required this.title});
+  const BankWidget({super.key, required this.title, required this.bank});
 
   final String title;
+  final BankService bank;
 
   @override
   State<BankWidget> createState() => _BankWidget();
@@ -33,7 +35,7 @@ class BankWidget extends StatefulWidget {
 
 class _BankWidget extends State<BankWidget> {
 
-  BankService bank = BankService();
+  late BankService bank;
   final ScrollController _scrollController = ScrollController();
   final _valueControllerDeposit = TextEditingController();
   final _valueControllerWithdrawal = TextEditingController();
@@ -46,6 +48,12 @@ class _BankWidget extends State<BankWidget> {
   double? _amountDeposit = 0;
   double? _amountWithdrawal = 0;
   double? _amountTransfer = 0;
+
+  @override
+  void initState() {
+    super.initState();
+     bank = widget.bank;
+  }
 
   @override
   void dispose(){
@@ -88,6 +96,23 @@ class _BankWidget extends State<BankWidget> {
     );
   }
 
+  void _handleLogout(BuildContext context) async {
+    try {
+      await bank.logout();
+      await bank.logout();
+      setState(() {});
+      // Volver a login y limpiar la navegación
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => LoginPage()),
+            (route) => false,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al cerrar sesión: $e')),
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -95,10 +120,26 @@ class _BankWidget extends State<BankWidget> {
 
       // Barra título
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: Text(
+          "Bienvenido ${widget.title}",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            letterSpacing: 1.2,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          // Botón en la AppBar para cerrar sesión.
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Cerrar sesión',
+            onPressed: () => _handleLogout(context),
+          )
+        ],
       ),
 
+      // ESTO NO HA SIDO MODIFICADO --------------------------------------------
       // Cuerpo central
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -171,10 +212,9 @@ class _BankWidget extends State<BankWidget> {
             child: Row(
               children: [
                 ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      bank.createAccount();
-                    });
+                  onPressed: () async{
+                    await bank.createAccount();
+                    setState(() {});
                   },
                   child: Text('Create new Account'),
                 ),
@@ -236,17 +276,18 @@ class _BankWidget extends State<BankWidget> {
                 // INGRESAR EL DINERO
                 ElevatedButton(
                   onPressed: () {
-                    setState(() {
+                    setState(() async {
                       if (_selectedAccountDeposit != "") {
                         if (_amountDeposit != null && _amountDeposit != 0) {
                           try{
-                            bank.deposit(_selectedAccountDeposit, _amountDeposit!);
+                            await bank.deposit(_selectedAccountDeposit, _amountDeposit!);
                           }
                           catch(e){
                             _ErrorAlert(e.toString());
                           }
                           _valueControllerDeposit.clear();
                           _selectedAccountDeposit = "";
+                          setState(() {});
                         }
                         else{
                           _ErrorAlert("No hay cantidad o es incorrecta");
@@ -316,17 +357,18 @@ class _BankWidget extends State<BankWidget> {
                 // RETIRAR EL DINERO
                 ElevatedButton(
                   onPressed: () {
-                    setState(() {
+                    setState(() async {
                       if (_selectedAccountWithdrawal != "") {
                         if (_amountWithdrawal != null && _amountWithdrawal != 0) {
                           try {
-                            bank.withdraw(_selectedAccountWithdrawal, _amountWithdrawal!);
+                            await bank.withdraw(_selectedAccountWithdrawal, _amountWithdrawal!);
                           }
                           catch(e){
                             _ErrorAlert(e.toString());
                           }
                           _valueControllerWithdrawal.clear();
                           _selectedAccountWithdrawal = "";
+                          setState(() {});
                         }
                         else{
                           _ErrorAlert("No hay cantidad o es incorrecta");
@@ -420,12 +462,12 @@ class _BankWidget extends State<BankWidget> {
                 // TRANSFERIR EL DINERO
                 ElevatedButton(
                   onPressed: () {
-                    setState(() {
+                    setState(() async {
                       if (_selectedAccountTransferFrom != "") {
                         if (_selectedAccountTransferTo != "") {
                           if (_amountTransfer != null && _amountTransfer != 0) {
                             try {
-                              bank.transfer(_selectedAccountTransferFrom,
+                              await bank.transfer(_selectedAccountTransferFrom,
                                   _selectedAccountTransferTo, _amountTransfer!);
                             }
                             catch (e) {
@@ -434,6 +476,7 @@ class _BankWidget extends State<BankWidget> {
                             _valueControllerTransfer.clear();
                             _selectedAccountTransferTo = "";
                             _selectedAccountTransferFrom = "";
+                            setState(() {});
                           }
                           else {
                             _ErrorAlert("No hay cantidad o es incorrecta");

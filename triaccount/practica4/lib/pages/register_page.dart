@@ -20,10 +20,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
   // Función que maneja el registro de usuario
   void _handleRegister() async {
-    setState(() {
-      isLoading = true;
-      errorMessage = null;
-    });
 
     try {
       // Intenta registrar al usuario con los datos proporcionados
