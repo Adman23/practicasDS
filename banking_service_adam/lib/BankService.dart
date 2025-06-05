@@ -102,13 +102,10 @@ class BankService {
   }
 
   Future<Account> createAccount() async {
-    final token = await TokenService().getToken();
-    if (token == null) throw Exception("No se ha realizado login");
 
     final url = Uri.parse('$apiUrl/accounts');
     final response = await http.post(url,
-        headers: {'Authorization': token,
-          'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json'},
     );
     if (response.statusCode == 201){
       // Se ha creado bien
